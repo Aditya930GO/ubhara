@@ -81,7 +81,6 @@ type PanelType =
   | "attendance"
   | "logs"
   | "login-form"
-  | "signup-form"
   | "user-form"
   | "employee-role-form";
 
@@ -579,16 +578,16 @@ watch(
           rdHeader.value
         );
       }, 500);
-    } else if (oldVal === "/signup" && val) {
-      panelHandler({ state: "hide", type: "signup-form" });
-      setTimeout(() => {
-        animate.init(
-          viewMode.value,
-          rdNavigation.value,
-          rdOverview.value,
-          rdHeader.value
-        );
-      }, 500);
+      // } else if (oldVal === "/signup" && val) {
+      //   panelHandler({ state: "hide", type: "signup-form" });
+      //   setTimeout(() => {
+      //     animate.init(
+      //       viewMode.value,
+      //       rdNavigation.value,
+      //       rdOverview.value,
+      //       rdHeader.value
+      //     );
+      //   }, 500);
     } else {
       panelHandler({ state: "show", type: "login-form" });
     }
