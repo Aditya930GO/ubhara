@@ -1,11 +1,5 @@
 <template>
-  <rd-panel
-    class="rd-panel"
-    :label="'Ubah Password'"
-    :state="panelState"
-    :loading="dataLoading"
-    @exit="emits('exit')"
-  >
+  <rd-panel class="rd-panel" :label="'Ubah Password'" :state="panelState" :loading="dataLoading" @exit="emits('exit')">
     <div class="rd-input-wrapper">
       <rd-input-text class="rd-input" :input="nameInput" />
     </div>
@@ -25,19 +19,14 @@
       <rd-input-text class="rd-input" :input="passwordCheckInput" />
     </div>
     <div class="rd-input-button-wrapper">
-      <rd-input-button
-        class="rd-input-button"
-        :label="props.data ? 'Update' : 'Submit'"
-        :loading="submitLoading"
+      <rd-input-button class="rd-input-button" :label="props.data ? 'Update' : 'Submit'" :loading="submitLoading"
         :disabled="
           !name ||
           !email ||
           !password ||
           check_password !== password ||
           old_password === password
-        "
-        @clicked="submit"
-      />
+        " @clicked="submit" />
     </div>
   </rd-panel>
 </template>
@@ -52,9 +41,7 @@ import {
 import { User } from "~~/interfaces/user";
 
 const config = useRuntimeConfig();
-const { refresh } = useUser();
-const { roles, getEmployeesRoles, addEmployees, updateEmployees } =
-  useEmployee();
+const { refresh, updateUser } = useUser();
 const emits = defineEmits(["exit", "open-panel"]);
 const props = defineProps<{
   state: "idle" | "hide";
@@ -166,16 +153,16 @@ const check_password: ComputedRef<string> = computed(
 
 async function submit(): Promise<void> {
   submitLoading.value = true;
-  const userId: string = await updateEmployees({
-    // file: file.value,
+  console.log(props.data._id)
+  const userId: string = await updateUser({
     _id: props.data._id,
     name: name.value,
     email: email.value,
     phone: phone.value,
     password: password.value,
     old_password: old_password.value,
-    // birth_date: birthDate.value,
     // role_id: selectedRoles.value,
+    // birth_date: birthDate.value,
     // branch_id: selectedBranches.value,
   });
   console.log("userId");
@@ -205,6 +192,10 @@ onMounted(async () => {
     emailInput.value.model = props.data.email;
     phoneInput.value.model = props.data.phone;
     birthDateInput.value.value = new Date(props.data.birth_date).toISOString();
+    console.log(props.data._id)
+    console.log(props.data._id)
+  } else {
+    console.log("props.data._id")
   }
 
   setTimeout(() => {
@@ -219,21 +210,25 @@ onMounted(async () => {
     position: relative;
     width: 100%;
     display: flex;
+
     .rd-input {
       width: 100%;
       padding: 0 1rem;
       box-sizing: border-box;
     }
+
     .rd-file-input {
       position: relative;
     }
   }
+
   .rd-input-roles-container,
   .rd-input-branches-container {
     position: relative;
     width: 100%;
     display: flex;
     flex-direction: column;
+
     span.rd-input-roles-placeholder,
     span.rd-input-branches-placeholder {
       position: relative;
@@ -246,6 +241,7 @@ onMounted(async () => {
       display: flex;
       align-items: center;
     }
+
     .rd-input-roles-wrapper,
     .rd-input-branches-wrapper {
       position: relative;
@@ -256,6 +252,7 @@ onMounted(async () => {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
+
       .rd-input-role,
       .rd-input-branch {
         cursor: pointer;
@@ -270,6 +267,7 @@ onMounted(async () => {
         justify-content: center;
         align-items: center;
         transition: 0.25s background-color;
+
         .rd-input-role-color {
           position: relative;
           width: 0.75rem;
@@ -277,11 +275,13 @@ onMounted(async () => {
           border-radius: 50%;
           margin-right: 0.25rem;
         }
+
         span.rd-input-role-text,
         span.rd-input-branch-text {
           position: relative;
           transition: 0.25s color;
         }
+
         &::before {
           content: "";
           position: absolute;
@@ -293,13 +293,16 @@ onMounted(async () => {
           opacity: 0.1;
           transition: 0.25s border-color;
         }
+
         &.rd-input-role-active,
         &.rd-input-branch-active {
           background: var(--primary-color);
+
           span.rd-input-role-text,
           span.rd-input-branch-text {
             color: #fff;
           }
+
           &::before {
             border-color: var(--primary-color);
           }
@@ -307,6 +310,7 @@ onMounted(async () => {
       }
     }
   }
+
   .rd-input-button-wrapper {
     position: fixed;
     bottom: 0;
@@ -319,9 +323,11 @@ onMounted(async () => {
     display: flex;
     justify-content: center;
     align-items: center;
+
     .rd-input-button {
       width: 100%;
     }
+
     &::after {
       content: "";
       position: absolute;

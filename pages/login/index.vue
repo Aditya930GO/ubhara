@@ -25,9 +25,9 @@
           <rd-input-button class="rd-page-form-input" :label="'Login'" :disabled="!email || !password"
             :loading="loginLoading" @clicked="submit" />
         </div>
-        <div class="rd-page-form-input-wrapper" @clicked="signup"
+        <div class="rd-page-form-input-wrapper" @clicked="signups"
           style="margin-top: 0.5rem; align-items: center; justify-content: center;">
-          <div class="rd-signup-button" @click="signup" style="font-size: small;cursor: pointer; user-select: none;">
+          <div class="rd-signup-button" @click="signups" style="font-size: small;cursor: pointer; user-select: none;">
             pengguna baru? Sign-up
           </div>
         </div>
@@ -59,24 +59,23 @@
           <rd-input-text class="rd-page-form-input" :input="passwordInput" />
         </div>
         <div class="rd-page-form-input-wrapper">
-          <rd-input-text class="rd-page-form-input" :input="passwordInput" />
+          <rd-input-text class="rd-page-form-input" :input="confirmPasswordInput" />
         </div>
         <div class="rd-page-form-input-wrapper" style="margin-top: 0.5rem">
-          <rd-input-button class="rd-page-form-input" :label="'Login'" :disabled="!email || !password"
-            :loading="loginLoading" @clicked="submit" />
+          <rd-input-button class="rd-page-form-input" :label="'Sign Up'"
+            :disabled="!email || !password || !uname || !name || !nim || password !== confirmPasswordInput.model"
+            :loading="loginLoading" @clicked="submitSignup" />
 
         </div>
-        <div class="rd-page-form-input-wrapper" @clicked="signup"
+        <div class="rd-page-form-input-wrapper" @clicked="signups"
           style="margin-top: 0.5rem; align-items: center; justify-content: center;">
-          <div class="rd-signup-button" @click="signupExit"
-            style="font-size: small;cursor: pointer; user-select: none;">
+          <div class="rd-signup-button" @click="signupExit" style="font-size: small;cursor: pointer; user-select: none;">
             Sudah punya akun? Login
           </div>
         </div>
       </form>
     </div>
   </div>
-
 </template>
 
 <script lang="ts" setup>
@@ -89,7 +88,7 @@ const route = useRoute();
 definePageMeta({
   middleware: ["no-auth"],
 });
-const { login } = useUser();
+const { login, signup } = useUser();
 const { viewMode } = useMain();
 const router = useRouter();
 const emits = defineEmits(["shake"]);
@@ -142,6 +141,15 @@ const passwordInput = ref<InputOption>({
   type: "password",
   error: "",
 });
+const confirmPasswordInput = ref<InputOption>({
+  name: "password",
+  placeholder: "hush...",
+  model: "",
+  label: "Password",
+  icon: "key",
+  type: "password",
+  error: "",
+});
 
 const email: ComputedRef<string> = computed(
   (): string => emailInput.value.model
@@ -173,7 +181,7 @@ const animate = {
       },
     });
 
-    if (viewMode === "desktop") {
+    if (viewMode === "desktop" || null) {
       tl.to(rdContainer, {
         scale: 1,
         opacity: 1,
@@ -249,7 +257,7 @@ const animate = {
         duration: 0.5,
         ease: "power2.in",
       }).to(rdContainerTwo, {
-        // y: "250%",
+        y: "-50%",
         top: "50%",
         opacity: 1,
         duration: 0.75,
@@ -286,7 +294,7 @@ const animate = {
       }, "<");
     } else {
       tl.to(rdContainerTwo, {
-        // y: "250%",
+        y: "250%",
         top: "-50%",
         opacity: 1,
         duration: 0.75,
@@ -303,26 +311,40 @@ const animate = {
 };
 
 
-function signup() {
+function signups() {
   animate.signupInit(viewMode.value, rdContainer.value, rdContainerTwo.value, () => {
   })
-  console.log(viewMode.value)
+  nameInput.value.model = "";
+  passwordInput.value.model = "";
+  unameInput.value.model = "";
+  emailInput.value.model = "";
+  nimInput.value.model = "";
+
 }
 function signupExit() {
   animate.signupExit(viewMode.value, rdContainer.value, rdContainerTwo.value, () => {
   })
-  console.log(viewMode.value)
+  nameInput.value.model = "";
+  passwordInput.value.model = "";
+  unameInput.value.model = "";
+  emailInput.value.model = "";
+  nimInput.value.model = "";
+
 }
 
 async function submitSignup() {
   if (email.value && password.value && !loginLoading.value) {
     loginLoading.value = true;
-    const user: User = await login(email.value, password.value);
+    const user = await signup(email.value, password.value, nim.value, uname.value, name.value);
     setTimeout(() => {
-      if (user) {
-        exit("/");
-      } else {
+      if (user === "USER_MUST_HAVE_VALID_NAME") {
         emits("shake");
+        nameInput.value.error = "This field is required"
+      } else if (user === "USER_MUST_HAVE_VALID_EMAIL") {
+        emits("shake");
+        emailInput.value.error = "This field is required"
+      } else {
+        signupExit();
       }
       loginLoading.value = false;
     }, 1000);
@@ -351,21 +373,58 @@ function exit(path: string = "/"): void {
 }
 
 watch(
+  () => confirmPasswordInput.value.model,
+  (val: string) => {
+    if (val !== passwordInput.value.model) {
+      passwordInput.value.error = "Kata sandi tidak sama";
+      confirmPasswordInput.value.error = "Kata sandi tidak sama";
+    }
+    else {
+      passwordInput.value.error = " ";
+      confirmPasswordInput.value.error = " ";
+    }
+  }
+);
+watch(
+  () => unameInput.value.model,
+  (val: string) => {
+    if (!val) unameInput.value.error = "This field is required";
+    else unameInput.value.error = " ";
+  }
+);
+watch(
+  () => nameInput.value.model,
+  (val: string) => {
+    if (!val) nameInput.value.error = "This field is required";
+    else nameInput.value.error = " ";
+  }
+);
+watch(
   () => emailInput.value.model,
   (val: string) => {
     if (!val) emailInput.value.error = "This field is required";
-    else emailInput.value.error = "";
+    else emailInput.value.error = " ";
+  }
+);
+watch(
+  () => nimInput.value.model,
+  (val: string) => {
+    if (!val) nimInput.value.error = "This field is required";
+    else nimInput.value.error = " ";
   }
 );
 watch(
   () => passwordInput.value.model,
   (val: string) => {
-    if (!val) passwordInput.value.error = "This field is required";
-    else passwordInput.value.error = "";
+    if (!val) passwordInput.value.error = "Kolom Wajib diisi";
+    else if (val.length < 8) passwordInput.value.error = "Password minimal 8 karakter";
+    else passwordInput.value.error = " ";
+    console.log(val.length < 8)
   }
 );
 
 onMounted(() => {
+  console.log(viewMode.value)
   setTimeout(() => {
     animate.init(viewMode.value, rdContainer.value);
   }, 500);

@@ -1,22 +1,24 @@
-import { User, UserOverview, UserRequest } from "~~/interfaces/user";
+import { User, UserMin, UserOverview, UserRequest } from "~~/interfaces/user";
 import { UserRole, UserRoleRequest } from "~~/interfaces/user-role";
 
 export default () => {
   const { $fetch } = useNuxtApp();
   const config = useRuntimeConfig();
 
-  const employees = useState<User[]>("employees", () => null);
+  const employees = useState<UserMin[]>("employees", () => null);
   const roles = useState<UserRole[]>("employees-roles", () => null);
 
-  const getEmployees = async (): Promise<User[]> => {
+  const getEmployees = async (): Promise<UserMin[]> => {
     try {
+      console.log("getEmployees begin")
       const response: Response = await $fetch(
         `${config.public.apiBase}/users`,
         "get"
       );
       if (response.status !== 200) throw new Error("");
 
-      const result: User[] = await response.json();
+      const result: UserMin[] = await response.json();
+      console.log(result)
       employees.value = result;
       return result;
     } catch (e) {
@@ -56,39 +58,39 @@ export default () => {
     }
   };
 
-  const addEmployees = async (payload: UserRequest): Promise<string> => {
-    try {
-      const response: Response = await $fetch(
-        `${config.public.apiBase}/users`,
-        "post",
-        JSON.stringify({
-          role_id: payload.role_id,
-          branch_id: payload.branch_id,
-          name: payload.name,
-          email: payload.email,
-          password: payload.password,
-          birth_date: payload.birth_date,
-          phone: payload.phone,
-        })
-      );
-      if (response.status !== 201) throw new Error("");
+  // const addEmployees = async (payload: UserRequest): Promise<string> => {
+  //   try {
+  //     const response: Response = await $fetch(
+  //       `${config.public.apiBase}/users`,
+  //       "post",
+  //       JSON.stringify({
+  //         role_id: payload.role_id,
+  //         branch_id: payload.branch_id,
+  //         name: payload.name,
+  //         email: payload.email,
+  //         password: payload.password,
+  //         birth_date: payload.birth_date,
+  //         phone: payload.phone,
+  //       })
+  //     );
+  //     if (response.status !== 201) throw new Error("");
 
-      const result: string = await response.text();
-      if (result && payload.file) {
-        const data: FormData = new FormData();
-        data.append("image", payload.file);
-        await $fetch(
-          `${config.public.apiBase}/users/image/${result}`,
-          "put",
-          data
-        );
-      }
+  //     const result: string = await response.text();
+  //     if (result && payload.file) {
+  //       const data: FormData = new FormData();
+  //       data.append("image", payload.file);
+  //       await $fetch(
+  //         `${config.public.apiBase}/users/image/${result}`,
+  //         "put",
+  //         data
+  //       );
+  //     }
 
-      return result;
-    } catch (e) {
-      return null;
-    }
-  };
+  //     return result;
+  //   } catch (e) {
+  //     return null;
+  //   }
+  // };
 
   const addEmployeesRoles = async (
     payload: UserRoleRequest
@@ -159,7 +161,7 @@ export default () => {
     getEmployees,
     getEmployeesOverview,
     getEmployeesRoles,
-    addEmployees,
+    // addEmployees,
     addEmployeesRoles,
   };
 };

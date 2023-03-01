@@ -1,11 +1,29 @@
 <template>
   <div class="rd-container" ref="rdContainer">
-    <div class="rd-page-body">
-      <div class="rd-main-wrapper">
-        <div class="rd-student-wrapper"></div>
-        <div class="rd-cbt-wrapper"></div>
-        <div class="rd-grade-wrapper"></div>
+    <div class="rd-subpage-container">
+      <div class="rd-subpage">
+        <div class="rd-subpage-header">
+          <h1 class="rd-subpage-header-tittle rd-headline-2">{{ user.role === 'student' ? 'Daftar Kelas' : 'Kelas Aktif'
+          }}</h1>
+          <div class="rd-subpage-header-button">
+            <rd-input-button v-if="viewMode === 'desktop'" class="rd-subpage-body-button" label="Tambah" icon="plus"
+              type="primary" @clicked="emits('open-panel', { state: 'show', type: 'add-class-form' })" />
+          </div>
+        </div>
+        <div class="rd-subpage-body">
+          <div ref="rdClassWrapper" class="rd-class-wrapper">
+            <rd-active-class v-for="(classRoom, i) in classes" :key="i" class="rd-class" :index="i" :data="classRoom"
+              @click="
+                emits('open-panel', {
+                  state: 'show',
+                  type: 'class-details',
+                  data: classRoom,
+                })
+              " />
+          </div>
+        </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -18,23 +36,17 @@ import {
   InputOption,
   InputSearchOption,
 } from "~~/interfaces/general";
-import { InmateQuery } from "~~/interfaces/inmates";
 import {
   TransactionOverview,
   TransactionQuery,
 } from "~~/interfaces/transaction";
 
-interface AppliedFilter {
-  key: "category" | "start_date" | "end_date" | "limit" | "skip";
-  value: InmateQuery["category"] | number;
-}
-
 definePageMeta({
   middleware: ["auth"],
 });
 
-
-const { query, inmates, getInmates } = useInmate();
+const { user } = useUser();
+const { classes, getClasses } = useClass();
 const route = useRoute();
 const emits = defineEmits(["logout", "open-panel"]);
 const { viewMode } = useMain();
@@ -50,78 +62,6 @@ const transactionsOverview = ref<TransactionOverview[]>(null);
 const transactionsSearchTimeout = ref<NodeJS.Timeout>(null);
 const transactionsInitLoading = ref<boolean>(true);
 const transactionsInitAnimating = ref<boolean>(true);
-
-const searchInput = ref<InputSearchOption>({
-  name: "search",
-  placeholder: "cari terdakwa...",
-  model: "",
-});
-const categoryInput = ref<InputOption>({
-  label: "Transaction type",
-  name: "type",
-  placeholder: "All",
-  model: "All",
-  value: "all",
-  error: "",
-  options: [
-    {
-      name: "Semua",
-      value: "all",
-    },
-    {
-      name: "Kategori I",
-      value: "Kategori I",
-    },
-    {
-      name: "Kategori II",
-      value: "Kategori II",
-    },
-    {
-      name: "Kategori III",
-      value: "Kategori III",
-    },
-  ],
-});
-
-const startDateInput = ref<InputOption>({
-  name: "start-date",
-  placeholder: "29-09-2022",
-  model: "",
-  value: "",
-  label: "From",
-  error: "",
-});
-const endDateInput = ref<InputOption>({
-  name: "end-date",
-  placeholder: "29-09-2022",
-  model: "",
-  value: "",
-  label: "To",
-  error: "",
-});
-
-const filterDropdownOpened = ref<boolean>(false);
-
-const search: ComputedRef<string> = computed(() => searchInput.value.model);
-const category: ComputedRef<string> = computed(() => categoryInput.value.value);
-const startDate: ComputedRef<InmateQuery["start_date"]> = computed(() =>
-  new Date(startDateInput.value.value).setHours(0, 0, 0, 0)
-);
-const endDate: ComputedRef<InmateQuery["end_date"]> = computed(() =>
-  new Date(endDateInput.value.value).setHours(23, 59, 59, 999)
-);
-
-const appliedFilter: ComputedRef<AppliedFilter[]> = computed(() =>
-  Object.keys(query.value)
-    .map((a: AppliedFilter["key"]) => ({ key: a, value: query.value[a] }))
-    .filter((a: AppliedFilter) => {
-      if (a.key === "limit" || a.key === "skip") return false;
-      if (a.key === "start_date" && !a.value) return false;
-      if (a.key === "end_date" && !a.value) return false;
-      if (a.key === "category" && a.value === "all") return false;
-      return true;
-    })
-);
 
 const animate = {
   init(
@@ -192,74 +132,6 @@ const animate = {
   },
 };
 
-function filterKeyHandler(data: AppliedFilter): string {
-  console.log(inmates);
-  let str: string = "";
-  if (data.key === "category") str = data.value.toString();
-  else if (data.key === "start_date" || data.key === "end_date") {
-    const date: Date = new Date(data.value);
-    str = `${data.key === "start_date" ? "from" : "to"} ${date
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(date.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${date.getFullYear()}`;
-  }
-
-  return str;
-}
-
-function assignQuery(key?: AppliedFilter["key"]): void {
-  if (!key) {
-    const payload: InmateQuery = {
-      category: category.value,
-      start_date: startDate.value,
-      end_date: endDate.value,
-    };
-
-    if (payload.category) query.value.category = payload.category;
-    if (payload.start_date) query.value.start_date = payload.start_date;
-    if (payload.end_date) query.value.end_date = payload.end_date;
-
-    filterDropdownHandler("close");
-  } else if (query.value[key]) {
-    if (key === "category") query.value.category = "all";
-    else if (key === "start_date") query.value.start_date = null;
-    else if (key === "end_date") query.value.end_date = null;
-  }
-}
-
-function filterDropdownHandler(state: "open" | "close"): void {
-  if (state === "open") {
-    filterDropdownOpened.value = true;
-    setTimeout(() => {
-      rdTransactionsFilterDropdown.value.focus();
-      animate.dropDownOpen(rdTransactionsFilterDropdown.value);
-    }, 100);
-  } else {
-    animate.dropDownClose(rdTransactionsFilterDropdown.value, () => {
-      filterDropdownOpened.value = false;
-    });
-  }
-}
-function conscol() {
-  console.log(route.path);
-  if (route.path !== "/") {
-    console.log(route.path);
-    emits("logout");
-    console.log(route.path);
-  }
-}
-
-function loadInmates(text?: string): void {
-  // transactionsLoading.value = true;
-  setTimeout(async () => {
-    console.log("text");
-    console.log(text);
-    await getInmates(text);
-    // transactionsLoading.value = false;
-  }, 250);
-}
 function loadTransactions(text?: string): void {
   // transactionsLoading.value = true;
   setTimeout(async () => {
@@ -269,90 +141,44 @@ function loadTransactions(text?: string): void {
 }
 
 // watch(
-//   () => transactions.value,
+//   () => search.value,
 //   (val) => {
-//     if (val) {
-//       setTimeout(() => {
-//         transactionsInitAnimating.value = false;
-//         setTimeout(() => {
-//           transactionsInitLoading.value = false;
-//         }, 250);
-//       }, 500);
-//     }
+//     clearTimeout(transactionsSearchTimeout.value);
+//     transactionsSearchTimeout.value = setTimeout(() => {
+//       loadTransactions(val || "");
+//       loadInmates(val || "");
+//     }, 500);
 //   }
 // );
-
-// watch(
-//   () => transactionsLoading.value,
-//   (val) => {
-//     if (val)
-//       animate.hideTransactions(rdTransactionsWrapper.value, () => {
-//         transactionsInitLoading.value = true;
-//       });
-//   }
-  // );
-  watch(
-    () => startDate.value,
-    (val) => {
-      if (val) {
-      if (val >= endDate.value)
-      startDateInput.value.error = "Start date must be less than end date";
-      else startDateInput.value.error = "";
-    } else startDateInput.value.error = "";
-  }
-  );
-  watch(
-    () => appliedFilter.value,
-    () => {
-      loadTransactions();
-      loadInmates();
-      console.log(inmates);
-    }
-  );
-  watch(
-    () => endDate.value,
-    (val) => {
-      if (val) {
-      if (startDate.value >= val)
-        startDateInput.value.error = "Start date must be less than end date";
-      else startDateInput.value.error = "";
-    } else startDateInput.value.error = "";
-  }
-);
-watch(
-  () => search.value,
-  (val) => {
-    clearTimeout(transactionsSearchTimeout.value);
-    transactionsSearchTimeout.value = setTimeout(() => {
-      loadTransactions(val || "");
-      loadInmates(val || "");
-    }, 500);
-  }
-);
 
 onMounted(() => {
   setTimeout(async () => {
     // transactionsOverview.value = await getTransactionOverview();
+    getClasses();
     animate.init(
       rdPageHeader.value,
       rdTransactionsFilterContainer.value,
       rdTransactionsOverviewContainer.value
     );
-    getInmates();
   }, 250);
 });
 </script>
 
 <style lang="scss" scoped>
 .rd-container {
-  overflow-y: auto;
+  // overflow-y: auto;
   margin-top: 4rem;
   position: relative;
-  height: 100%;
+  height: auto;
   width: 100%;
   display: flex;
   flex-direction: column;
- 
+  // background-color: red;
+  height: 100%;
+  // padding-bottom: 5rem;
+
+  // height: calc(100% - 4rem);
+  // border: 1px red solid;
   .rd-page-header {
     z-index: 99;
     background: var(--background-depth-one-color);
@@ -365,6 +191,7 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     flex-direction: row;
+
     .rd-transactions-filter-container {
       position: relative;
       z-index: 300;
@@ -373,10 +200,12 @@ onMounted(() => {
       // opacity: 0;
       display: flex;
       justify-content: space-between;
+
       .rd-transactions-filter {
         position: relative;
         display: flex;
         justify-content: flex-end;
+
         .rd-transactions-filter-selected-container {
           position: relative;
           width: 15rem;
@@ -388,6 +217,7 @@ onMounted(() => {
           flex-direction: row-reverse;
           justify-content: flex-start;
           align-items: center;
+
           .rd-transactions-filter-selected {
             position: relative;
             height: 2rem;
@@ -397,6 +227,7 @@ onMounted(() => {
             flex-shrink: 0;
             justify-content: center;
             align-items: center;
+
             .rd-transactions-filter-selected-close {
               cursor: pointer;
               position: relative;
@@ -408,10 +239,12 @@ onMounted(() => {
               justify-content: center;
               align-items: center;
             }
+
             span.rd-transactions-filter-selected-value {
               position: relative;
               color: var(--secondary-font-color);
             }
+
             &::before {
               content: "";
               position: absolute;
@@ -426,6 +259,7 @@ onMounted(() => {
           }
         }
       }
+
       .rd-transactions-filter-dropdown {
         z-index: 9999;
         position: absolute;
@@ -441,6 +275,7 @@ onMounted(() => {
         display: flex;
         flex-direction: column;
         transform: scale(1.125);
+
         .rd-transactions-filter-dropdown-header {
           position: relative;
           width: 100%;
@@ -450,11 +285,13 @@ onMounted(() => {
           justify-content: space-between;
           align-items: center;
         }
+
         .rd-transactions-filter-dropdown-input-wrapper {
           position: relative;
           width: 100%;
           display: flex;
           justify-content: space-between;
+
           .rd-transactions-filter-dropdown-input {
             width: 100%;
           }
@@ -462,14 +299,21 @@ onMounted(() => {
       }
     }
   }
+
   .rd-page-body {
     margin-top: 7rem;
     overflow: hidden;
     position: relative;
     width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     background: red;
+
+    .rd-main-wrapper {
+      height: inherit;
+    }
+
     .rd-transactions-overview-container {
       position: relative;
       width: 100%;
@@ -477,6 +321,7 @@ onMounted(() => {
       display: flex;
       justify-content: space-between;
       gap: 1rem;
+
       .rd-transactions-overview {
         position: relative;
         width: calc((100% - 2rem) / 3);
@@ -488,18 +333,21 @@ onMounted(() => {
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
+
         .rd-transactions-overview-header {
           position: relative;
           width: 100%;
           height: 2rem;
           display: flex;
           align-items: center;
+
           .rd-transactions-overview-icon-container {
             position: relative;
             width: 2rem;
             height: 2rem;
             display: flex;
           }
+
           .rd-transactions-overview-title-container {
             position: relative;
             width: calc(100% - 2rem);
@@ -509,6 +357,7 @@ onMounted(() => {
             display: flex;
             flex-direction: column;
             justify-content: center;
+
             span.rd-transactions-overview-subtitle {
               position: relative;
               margin-top: 0.125rem;
@@ -518,6 +367,7 @@ onMounted(() => {
         }
       }
     }
+
     .rd-transactions-filter-container {
       position: relative;
       width: 100%;
@@ -525,10 +375,12 @@ onMounted(() => {
       opacity: 0;
       display: flex;
       justify-content: space-between;
+
       .rd-transactions-filter {
         position: relative;
         display: flex;
         justify-content: flex-end;
+
         .rd-transactions-filter-selected-container {
           position: relative;
           width: 15rem;
@@ -540,6 +392,7 @@ onMounted(() => {
           flex-direction: row-reverse;
           justify-content: flex-start;
           align-items: center;
+
           .rd-transactions-filter-selected {
             position: relative;
             height: 2rem;
@@ -549,6 +402,7 @@ onMounted(() => {
             flex-shrink: 0;
             justify-content: center;
             align-items: center;
+
             .rd-transactions-filter-selected-close {
               cursor: pointer;
               position: relative;
@@ -560,10 +414,12 @@ onMounted(() => {
               justify-content: center;
               align-items: center;
             }
+
             span.rd-transactions-filter-selected-value {
               position: relative;
               color: var(--primary-color);
             }
+
             &::before {
               content: "";
               position: absolute;
@@ -577,6 +433,7 @@ onMounted(() => {
             }
           }
         }
+
         &::before {
           pointer-events: none;
           z-index: 20;
@@ -589,6 +446,7 @@ onMounted(() => {
           box-shadow: 0 0.5rem 0.5rem 0.5rem var(--background-depth-two-color);
         }
       }
+
       .rd-transactions-filter-dropdown {
         z-index: 9999;
         position: absolute;
@@ -604,6 +462,7 @@ onMounted(() => {
         display: flex;
         flex-direction: column;
         transform: scale(1.125);
+
         .rd-transactions-filter-dropdown-header {
           position: relative;
           width: 100%;
@@ -613,17 +472,20 @@ onMounted(() => {
           justify-content: space-between;
           align-items: center;
         }
+
         .rd-transactions-filter-dropdown-input-wrapper {
           position: relative;
           width: 100%;
           display: flex;
           justify-content: space-between;
+
           .rd-transactions-filter-dropdown-input {
             width: 100%;
           }
         }
       }
     }
+
     .rd-transactions-wrapper {
       margin: 1rem;
       z-index: 1;
@@ -631,15 +493,18 @@ onMounted(() => {
       width: 95%;
       display: flex;
       flex-direction: column;
+
       .rd-transaction {
         position: relative;
         margin-bottom: 1rem;
       }
     }
+
     .rd-end-list {
       display: flex;
       justify-content: center;
     }
+
     .rd-transactions-loading {
       position: relative;
       width: 100%;
@@ -649,11 +514,66 @@ onMounted(() => {
       align-items: center;
     }
   }
+
+  .rd-subpage-container {
+    padding: 0 2rem;
+    position: relative;
+    width: calc(100% - 21rem);
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 5rem;
+
+    .rd-subpage {
+      position: relative;
+      display: flex;
+      width: 100%;
+      flex-direction: column;
+      justify-content: space-between;
+
+
+      .rd-subpage-header {
+        position: relative;
+        width: 100%;
+        height: 2rem;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1rem;
+      }
+
+      .rd-subpage-body {
+        position: relative;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+
+        .rd-class-wrapper {
+          position: relative;
+          width: 100%;
+          display: flex;
+          gap: 1rem;
+          flex-wrap: wrap;
+
+          .rd-class {
+            width: calc((100% - 2rem) / 3);
+          }
+        }
+
+        .rd-subpage-body-button {
+          width: 100%;
+        }
+      }
+    }
+  }
+
   .rd-page-button {
     z-index: 9999999;
     bottom: 2rem;
     right: 22.5rem;
   }
+
   @media only screen and (max-width: 1024px) {
     .rd-page-body {
       .rd-transactions-overview-container {
@@ -663,12 +583,14 @@ onMounted(() => {
         margin-bottom: 1rem;
         box-sizing: border-box;
         overflow-x: auto;
+
         .rd-transactions-overview {
           width: 75%;
           flex-shrink: 0;
         }
       }
     }
+
     .rd-button-container {
       z-index: 9999999;
       position: absolute;
@@ -680,6 +602,7 @@ onMounted(() => {
       justify-content: flex-end;
       align-items: flex-end;
     }
+
     .rd-page-button {
       z-index: 2;
       bottom: 1.5rem;

@@ -1,39 +1,24 @@
 <template>
-  <button
-    class="rd-input-component"
-    ref="rdInputComponent"
-    :class="`${props.icon ? 'rd-input-component-icon' : ''} ${
-      props.disabled ? 'rd-input-component-disabled' : ''
-    } ${
-      props.loading || buttonAnimating ? 'rd-input-component-animating' : ''
-    } rd-input-component-${props.type ? props.type : 'primary'}`"
-    :disabled="props.disabled"
-    @mousedown="mouseDownHandler"
-  >
+  <button class="rd-input-component" ref="rdInputComponent" :class="`${props.icon ? 'rd-input-component-icon' : ''} ${props.disabled ? 'rd-input-component-disabled' : ''
+  } ${props.loading || buttonAnimating ? 'rd-input-component-animating' : ''
+  } rd-input-component-${props.type ? props.type : 'primary'}`" :disabled="props.disabled"
+    @mousedown="mouseDownHandler">
     <div v-if="props.icon" class="rd-input-icon-container">
-      <rd-svg :name="props.icon" :color="'primary'" />
+      <rd-svg :name="props.icon" :color="type ? 'secondary' : 'primary'" />
     </div>
     <div class="rd-input-label-container">
       <label class="rd-input-label rd-body-text rd-input-label-decoy">
         {{ props.label }}
       </label>
       <label class="rd-input-label rd-body-text rd-input-label-main">
-        <span
-          class="rd-letter"
-          :class="letter === ' ' ? 'rd-letter-space' : ''"
-          v-for="(letter, i) in props.label"
-          :key="i"
-        >
+        <span class="rd-letter" :class="letter === ' ' ? 'rd-letter-space' : ''" v-for="(letter, i) in props.label"
+          :key="i">
           {{ letter }}
         </span>
       </label>
       <label class="rd-input-label rd-body-text rd-input-label-overlay">
-        <span
-          class="rd-letter"
-          :class="letter === ' ' ? 'rd-letter-space' : ''"
-          v-for="(letter, i) in props.label"
-          :key="i"
-        >
+        <span class="rd-letter" :class="letter === ' ' ? 'rd-letter-space' : ''" v-for="(letter, i) in props.label"
+          :key="i">
           {{ letter }}
         </span>
       </label>
@@ -242,6 +227,7 @@ button.rd-input-component {
   display: flex;
   background: var(--background-depth-one-color);
   border: 1px solid var(--primary-color);
+  border: 1px solid black;
   border-radius: 0.75rem;
   // border: none;
   padding: 0;
@@ -249,9 +235,11 @@ button.rd-input-component {
   overflow: hidden;
   display: flex;
   align-items: center;
+
   * {
     pointer-events: none;
   }
+
   .rd-input-label-container {
     position: relative;
     width: 100%;
@@ -261,28 +249,35 @@ button.rd-input-component {
     display: flex;
     justify-content: center;
     align-items: center;
+
     label.rd-input-label {
       position: absolute;
       width: 100%;
       height: 100%;
-      color: var(--primary-color);
+      color: black;
       display: flex;
       justify-content: center;
       align-items: center;
+
       span.rd-letter {
+        font-size: small;
+        font-weight: 800;
         position: relative;
         display: flex;
+
         &.rd-letter-space {
-          width: 0.125rem;
+          width: 0.25rem;
           height: 100%;
         }
       }
+
       &.rd-input-label-overlay {
         span.rd-letter {
           transform: translateY(100%);
           opacity: 0;
         }
       }
+
       &.rd-input-label-decoy {
         position: relative;
         opacity: 0;
@@ -290,6 +285,7 @@ button.rd-input-component {
       }
     }
   }
+
   .rd-input-progress-bar {
     position: absolute;
     top: calc(50% - 0.375rem);
@@ -298,6 +294,7 @@ button.rd-input-component {
     height: 0.75rem;
     opacity: 0;
     animation: rd-rotate 500ms linear infinite;
+
     .rd-input-progress-bar-outer {
       position: absolute;
       top: 0;
@@ -305,6 +302,7 @@ button.rd-input-component {
       width: 0.375rem;
       height: 0.75rem;
       overflow: hidden;
+
       .rd-input-progress-bar-inner {
         position: absolute;
         top: 0;
@@ -316,11 +314,11 @@ button.rd-input-component {
         border-left-color: transparent;
         border-bottom-color: transparent;
         box-sizing: border-box;
-        animation: rd-circular-rotate 1000ms cubic-bezier(0.4, 0, 0.22, 1)
-          infinite;
+        animation: rd-circular-rotate 1000ms cubic-bezier(0.4, 0, 0.22, 1) infinite;
       }
     }
   }
+
   .rd-input-overlay {
     pointer-events: none;
     position: absolute;
@@ -331,20 +329,24 @@ button.rd-input-component {
     background: rgba(0, 0, 0, 0.1);
     opacity: 0;
   }
+
   &.rd-input-component-disabled {
     pointer-events: none;
     filter: grayscale(0.75);
     opacity: 0.5;
   }
+
   &.rd-input-component-animating {
     pointer-events: none !important;
   }
+
   &.rd-input-component-icon {
     .rd-input-label-container {
       width: calc(100% - 2rem);
     }
+
     .rd-input-icon-container {
-      color: var(--primary-color);
+      color: black;
       position: relative;
       width: 2rem;
       height: 2rem;
@@ -356,20 +358,24 @@ button.rd-input-component {
       align-items: center;
     }
   }
+
   &.rd-input-component-secondary {
     background: transparent;
     border: 1px solid var(--primary-color);
     box-sizing: border-box;
+
     .rd-input-label-container {
       label.rd-input-label {
         color: var(--primary-color);
       }
     }
   }
+
   &.rd-input-component-error {
     background: transparent;
     border: 1px solid var(--error-color);
     box-sizing: border-box;
+
     .rd-input-label-container {
       label.rd-input-label {
         color: var(--error-color);

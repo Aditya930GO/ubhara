@@ -11,7 +11,7 @@
             <h3 class="rd-body-header-caption rd-headline-5">
               Sistem Informasi Universitas Bhayangkara Surabaya
             </h3>
-            <h1 class="rd-body-header-title rd-headline-2">
+            <h1 class="rd-body-header-title rd-headline-1">
               Universitas Bhayangkara Surabaya
             </h1>
           </div>
@@ -32,7 +32,8 @@
             </button>
           </div>
           <div v-if="dropDownState" class="actions-container" @focusout="dropDownCloser()">
-            <div ripple class="action" @click="dropDownState = false, test1()">
+            <div ripple class="action"
+              @click="dropDownState = false, panelHandler({ state: 'show', type: 'rd-user-form' })">
               <div class="rd-icon-container">
                 <rd-svg class="icon" :name="'account'" :color="dropDownState ? 'primary' : 'primary'" />
               </div>
@@ -52,6 +53,13 @@
       <main class="rd-body-content">
         <nuxt-page @open-panel="panelHandler" @logout="exit" />
       </main>
+      <rd-add-class-panel v-if="panelOpened === 'add-class-form'" :state="panelState" :data="panelData[0]"
+        @exit="panelHandler({ state: 'hide' })" />
+      <rd-user-form-panel v-if="panelOpened === 'rd-user-form'" :state="panelState" :data="panelData[0]"
+        @exit="panelHandler({ state: 'hide' })" />
+      <rd-analytics v-if="user && route.path !== '/login'" :state="panelState" :data="panelData[0]"
+        @exit="panelHandler({ state: 'hide' })" />
+      <!-- <rd-inmate-form-panel :state="panelState" :data="panelData[0]" @exit="panelHandler({ state: 'hide' })" /> -->
     </section>
   </div>
 </template>
@@ -80,9 +88,11 @@ interface PanelHandlerOption {
 type PanelType =
   | "attendance"
   | "logs"
+  | "rd-user-form"
   | "login-form"
   | "user-form"
-  | "employee-role-form";
+  | "employee-role-form"
+  | "add-class-form";
 
 const emits = defineEmits(["logout", "open-panel", "open-panel-user"]);
 const { user, refresh, logout } = useUser();
@@ -589,7 +599,7 @@ watch(
       //     );
       //   }, 500);
     } else {
-      panelHandler({ state: "show", type: "login-form" });
+      // panelHandler({ state: "show", type: "login-form" });
     }
   }
 );
@@ -597,10 +607,10 @@ watch(
 onMounted(async () => {
   const mediaQuery: MediaQueryList = window.matchMedia("(max-width: 1024px)");
   mediaQuery.addEventListener("change", resizeHandler);
+  resizeHandler(mediaQuery);
+  await refresh();
   if (user.value) {
-    await refresh();
-    resizeHandler(mediaQuery);
-    panelHandler({ state: "hide", type: "login-form" });
+    // panelHandler({ state: "hide", type: "login-form" });
     animate.init(
       viewMode.value,
       rdNavigation.value,
@@ -609,7 +619,7 @@ onMounted(async () => {
     );
     // console.log("c1");
   } else {
-    panelHandler({ state: "show", type: "login-form" });
+    // panelHandler({ state: "show", type: "login-form" });
     // console.log("c2");
   }
 });
@@ -631,26 +641,32 @@ onMounted(async () => {
     height: 100%;
     display: flex;
     flex-direction: column;
+    background: var(--background-depth-three-color);
 
     header.rd-body-header {
-      z-index: 99999;
+      z-index: 54;
       position: fixed;
       // width: 100%;
-      width: calc(100% - 1rem);
+      width: calc(100%);
       height: 4rem;
-      padding: 0 2rem;
+      padding-right: 2rem;
       top: 0;
       display: flex;
       box-sizing: border-box;
       justify-content: space-between;
       align-items: center;
-      background: var(--background-depth-three-color);
+      // background: var(--background-depth-three-color);
 
       .rd-body-header-left {
+        padding-left: 2rem;
+        width: 100%;
+        height: 100%;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: flex-start;
+        background: var(--background-depth-three-color);
+        // background: red;
 
         .rd-body-header-logo-container {
           position: relative;
@@ -790,8 +806,8 @@ onMounted(async () => {
         .actions-container {
           z-index: 1000000;
           position: absolute;
-          top: 100%;
-          right: 0;
+          top: 80%;
+          right: 2rem;
           border-radius: 0.75rem;
           background: var(--background-depth-two-color);
           border: 1px solid var(--border-color);
@@ -942,45 +958,11 @@ onMounted(async () => {
     main.rd-body-content {
       position: relative;
       width: 100%;
-      height: 100%;
       background: var(--background-depth-three-color);
-      // height: calc(100% - 10rem);
+      height: calc(100% - 4rem);
     }
-
-    // section.rd-overview {
-    //   display: none;
-    // }
   }
 }
-
-// section.rd-overview {
-//   z-index: 0;
-//   position: fixed;
-//   right: 1rem;
-//   width: 20rem;
-//   height: 100%;
-//   background: var(--background-depth-three-color);
-//   padding: 1rem 0 1rem 1rem;
-//   box-sizing: border-box;
-//   display: flex;
-//   flex-direction: column;
-//   border-left: 1px solid var(--border-color);
-//   // transform: translateX(150%);
-// }
-// z-index: 0;
-// padding: 1rem;
-// position: relative;
-// width: 20rem;
-// height: 100%;
-// display: flex;
-// box-sizing: border-box;
-// flex-direction: column;
-// .add {
-//   height: 100%;
-//   overflow-y: auto;
-//   overflow-x: hidden;
-// }
-// }
 </style>
 <style lang="scss">
 // ::-webkit-scrollbar {

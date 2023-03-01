@@ -1,78 +1,25 @@
 <template>
-  <rd-panel
-    class="rd-panel"
-    :label="'Tambah Berkas'"
-    :state="panelState"
-    :loading="dataLoading"
-    @exit="exit"
-  >
+  <rd-panel class="rd-panel" :label="dataInmate ? 'Ubah Kelas' : 'Tambah Kelas'" :state="panelState"
+    :loading="dataLoading" @exit="exit">
     <div class="rd-form-fieldset">
-      <div
-        class="rd-input-wrapper"
-        style="margin-bottom: 1rem; width: calc(100% + 2rem); left: -1rem"
-      >
-        <rd-input-images :input="fileInput" />
-      </div>
-      <div class="rd-form-fieldset-input-wrapper">
-        <rd-input-text class="rd-fieldset-input" :input="regInput" />
-      </div>
       <div class="rd-form-fieldset-input-wrapper">
         <rd-input-text class="rd-fieldset-input" :input="nameInput" />
       </div>
       <div class="rd-form-fieldset-input-wrapper">
-        <rd-input-text class="rd-fieldset-input" :input="aliasInput" />
+        <rd-input-text class="rd-fieldset-input" :input="scheduleInput" />
       </div>
       <div class="rd-form-fieldset-input-wrapper">
-        <rd-input-text class="rd-fieldset-input" :input="NIKInput" />
-      </div>
-      <div class="rd-form-fieldset-double-input-wrapper">
-        <rd-input-text
-          class="rd-fieldset-input"
-          :input="pobInput"
-          style="margin-right: 1rem"
-        />
-        <rd-input-text class="rd-fieldset-input" :input="dobInput" />
-      </div>
-      <div class="rd-form-fieldset-input-wrapper">
-        <rd-input-select class="rd-fieldset-input" :input="sexInput" />
-      </div>
-      <div class="rd-form-fieldset-input-wrapper">
-        <rd-input-text class="rd-fieldset-input" :input="addressInput" />
-      </div>
-      <div class="rd-form-fieldset-double-input-wrapper">
-        <div class="rd-form-fieldset-input-wrapper">
-          <rd-input-text
-            class="rd-fieldset-input"
-            :input="cityInput"
-            style="margin-right: 0.5rem"
-          />
-        </div>
-        <div class="rd-form-fieldset-input-wrapper">
-          <rd-input-text
-            class="rd-fieldset-input"
-            :input="districtInput"
-            style="margin-left: 0.5rem"
-          />
-        </div>
-      </div>
-      <div class="rd-form-fieldset-input-wrapper">
-        <rd-input-select class="rd-fieldset-input" :input="catInput" />
-      </div>
-      <div class="rd-form-fieldset-input-wrapper">
-        <rd-input-text class="rd-fieldset-input" :input="dateInput" />
+        <rd-input-text class="rd-fieldset-input" :input="tagsInput" />
       </div>
       <div class="rd-form-fieldset-input-wrapper">
         <rd-input-text class="rd-fieldset-input" :input="notesInput" />
       </div>
     </div>
     <!-- <div class="rd-input-button-container"> -->
-    <rd-input-button
-      class="rd-form-button"
-      style="margin: 0 2rem"
-      :loading="submitLoading"
-      :label="'Submit'"
-      @clicked="submit"
-    />
+    <rd-input-button class="rd-form-button" style="margin: 0 2rem" :loading="submitLoading" :disabled="
+      !nameInput.model
+
+    " :label="'Submit'" @clicked="submit()" />
     <!-- </div> -->
   </rd-panel>
 </template>
@@ -81,176 +28,96 @@
 import gsap from "gsap";
 import { ComputedRef } from "vue";
 
-import { InputOption, InputImageOption } from "~~/interfaces/general.js";
+import {
+  InputGeneric,
+  InputMonth,
+  InputOption,
+  InputImageOption,
+} from "~~/interfaces/general.js";
+import { Inmate } from "~~/interfaces/inmates.js";
 import { InmateRequest } from "~~/interfaces/inmates";
+import { processSlotOutlet } from "@vue/compiler-core";
 
-const { getInmates, addInmate } = useInmate();
+// const { getInmates, addInmate, updateInmate, getInmateDetails } = useInmate();
+const { getClasses, addClass, updateClass, getClassDetails } = useClass();
 
 const props = defineProps<{
   state: "idle" | "hide";
+  data?: string;
 }>();
 const emits = defineEmits(["exit", "update"]);
-
-const rdFieldsetBody = ref<HTMLDivElement>(null);
-const rdItemEmpty = ref<HTMLDivElement>(null);
-const rdItemDecoy = ref<HTMLDivElement>(null);
-const rdItem = ref<HTMLDivElement[]>(null);
+const config = useRuntimeConfig();
 
 const dataLoading = ref<boolean>(true);
-const dataBranches = ref<{ name: string; value: string }[]>(null);
-const dataCustomers = ref<{ name: string; value: string }[]>(null);
-const dataSuppliers = ref<{ name: string; value: string }[]>(null);
-const dataProducts = ref<{ name: string; value: string }[]>(null);
-
+const dataInmate = ref<Inmate>(null);
 const submitLoading = ref<boolean>(false);
+var dateInmate = null;
+var birthdateInmate = null;
+var dataImageUrl = null;
 const panelState = ref<"idle" | "hide">("idle");
-const file: ComputedRef<(File | string)[]> = computed(
-  (): (File | string)[] => fileInput.value.file
-);
+
+const category: string[] = ["Kategori I", "Kategori II", "Kategori III"];
+const sexs: string[] = ["pria", "wanita"];
+const months: string[] = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
+
 const fileInput = ref<InputImageOption>({
   label: "Upload images",
   limit: 3,
   file: [],
 });
 
-const regInput = ref<InputOption>({
-  name: "registration",
-  label: "Nomor Registrasi",
-  placeholder: "II/12...",
-  model: "",
-  value: "",
-  error: "",
-});
+
 const nameInput = ref<InputOption>({
   name: "name",
-  label: "Nama",
+  label: "Nama Kelas",
   placeholder: "...",
   model: "",
   value: "",
   error: "",
 });
-const aliasInput = ref<InputOption>({
-  name: "alias",
-  label: "alias",
-  placeholder: "...",
+const scheduleInput = ref<InputOption>({
+  name: "schedule",
+  label: "Jadwal",
+  placeholder: "Senin",
   model: "",
   value: "",
   error: "",
 });
-const NIKInput = ref<InputOption>({
-  name: "NIK",
-  label: "NIK",
-  placeholder: "3570....",
-  model: "",
-  type: "num",
-  value: "",
-  error: "",
-});
-const pobInput = ref<InputOption>({
-  name: "pob",
-  label: "Tempat lahir",
-  placeholder: "kota...",
-  value: "",
-  model: "",
-  error: "",
-});
-const dobInput = ref<InputOption>({
-  name: "dob",
-  label: "Tanggal Lahir",
-  placeholder: "dd/mm/yyyy",
-  model: "",
-  error: "",
-  value: "",
-  disabled: false,
-});
-const dateInput = ref<InputOption>({
-  name: "date",
-  label: "Tanggal Masuk",
-  placeholder: "dd/mm/yyyy",
-  model: "",
-  value: "",
-  error: "",
-  disabled: false,
-});
-const addressInput = ref<InputOption>({
-  name: "address",
-  label: "Alamat",
-  placeholder: "...",
+const tagsInput = ref<InputOption>({
+  name: "tags",
+  label: "tag(dipisah dengan koma)",
+  placeholder: "Umum, hukum, ...",
   model: "",
   value: "",
   error: "",
 });
 const notesInput = ref<InputOption>({
   name: "notes",
-  label: "Keterangan(opsional)",
+  label: "Catatan(opsional)",
   placeholder: "...",
   model: "",
   value: "",
   error: "",
-});
-const cityInput = ref<InputOption>({
-  name: "city",
-  label: "Kota",
-  placeholder: "...",
-  model: "",
-  value: "",
-  error: "",
-});
-const districtInput = ref<InputOption>({
-  name: "district",
-  label: "Kecamatan",
-  placeholder: "...",
-  model: "",
-  value: "",
-  error: "",
-});
-
-const sexInput = ref<InputOption>({
-  name: "sex",
-  label: "Jenis Kelamin",
-  model: "",
-  placeholder: "",
-  value: "",
-  error: "",
-  options: ["pria", "wanita"],
-});
-const catInput = ref<InputOption>({
-  name: "category",
-  label: "Klasifikasi Perkara",
-  model: "",
-  placeholder: "",
-  value: "",
-  error: "",
-  options: ["Kategori I", "Kategori II", "Kategori III"],
 });
 
 const name: ComputedRef<string> = computed((): string => nameInput.value.model);
-const alias: ComputedRef<string> = computed(
-  (): string => aliasInput.value.model
-);
-const NIK: ComputedRef<string> = computed((): string => NIKInput.value.model);
-const cat: ComputedRef<string> = computed((): string => catInput.value.model);
-const registration: ComputedRef<string> = computed(
-  (): string => regInput.value.model
-);
-const placeOfBirth: ComputedRef<string> = computed(
-  (): string => pobInput.value.model
-);
-const dateOfBirth: ComputedRef<string> = computed(
-  (): string => dobInput.value.model
-);
-const date: ComputedRef<string> = computed((): string => dateInput.value.model);
-const address: ComputedRef<string> = computed(
-  (): string => addressInput.value.model
-);
-const notes: ComputedRef<string> = computed(
-  (): string => notesInput.value.model
-);
-const city: ComputedRef<string> = computed((): string => cityInput.value.model);
-const district: ComputedRef<string> = computed(
-  (): string => districtInput.value.model
-);
-const sex: ComputedRef<string> = computed((): string => sexInput.value.model);
+const schedule: ComputedRef<string> = computed((): string => scheduleInput.value.model);
+const notes: ComputedRef<string> = computed((): string => notesInput.value.model);
+const tags: ComputedRef<string> = computed((): string => tagsInput.value.model);
+
 
 const animate = {
   initItem(
@@ -435,52 +302,87 @@ function exit(): void {
 
 async function submit(): Promise<void> {
   submitLoading.value = true;
-  const fileNew: File[] = [];
 
-  for (const data of file.value) {
-    if (data instanceof File) {
-      fileNew.push(data);
-    }
-  }
-  const payload: InmateRequest = {
-    registration: registration.value,
-    category: cat.value,
-    NIK: NIK.value,
+  const payload = {
     name: name.value,
-    alias: alias.value,
-    place_of_birth: placeOfBirth.value,
-    date_of_birth: new Date(1328288400000),
-    date: new Date(1328288400000),
-    address: address.value,
-    notes: notes.value,
-    city: city.value,
-    district: district.value,
-    sex: sex.value,
-    file: fileNew,
+    schedule: schedule.value,
+    tags: tags.value,
+    notes: notes.value ? notes.value : "-",
+
   };
-  getInmates();
-  console.log(payload);
-  const addID: string = await addInmate(payload);
-  console.log(addID);
+  let addID: string = "";
+  if (props.data) {
+    var newTags = tags.value.replace(' ', '')
+    const payload = {
+      name: name.value,
+      schedule: schedule.value,
+      tags: newTags,
+      notes: notes.value ? notes.value : "-",
+    };
+
+
+    addID = await updateClass(payload, true);
+  } else {
+    addID = await addClass(payload);
+  }
+  getClasses();
+  // console.log(addID);
   if (addID) {
+    console.log(addID);
     panelState.value = "hide";
   }
 }
+function dateHandler(x: Date, y): string {
+  const datse = new Date(x);
+  const year: number = datse.getFullYear();
+  const month: number = datse.getMonth();
+  const date: number = datse.getDate();
+  const hours: number = datse.getHours();
+  const minutes: number = datse.getMinutes();
 
+  if (y === "year") return `${year}`;
+  if (y === "months") return `${months[month]}`;
+  if (y === "month") return `${month}`;
+  if (y === "date") return ` ${date}`;
+
+  return;
+}
+
+// watch(
+//   () => yearInsideInput.value.model,
+//   (val: string) => {
+//     if (val.length < 4 || !val)
+//       yearInsideInput.value.error = "This field is required";
+//     else yearInsideInput.value.error = " ";
+//   }
+// );
 onMounted(async () => {
-  setTimeout(() => {
-    dataLoading.value = false;
-  }, 500);
+  if (props.data) {
+    const data = await getClassDetails(props.data);
+    // console.log(data.date_of_birth);
+    if (data) {
+
+      setTimeout(() => {
+        dataLoading.value = false;
+      }, 500);
+    }
+  } else {
+    setTimeout(() => {
+      dataLoading.value = false;
+    }, 500);
+  }
 });
 </script>
 
 <style lang="scss" scoped>
 .rd-panel {
-  width: 20rem;
+
+  // width: 20rem;
   .rd-product-switch {
     width: calc(100% - 2rem);
     margin: 0 1rem 1rem 1rem;
   }
+
   .rd-form-fieldset {
     position: relative;
     width: calc(100% - 2rem);
@@ -490,16 +392,19 @@ onMounted(async () => {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+
     .rd-input-wrapper {
       width: 100%;
       position: relative;
     }
+
     .rd-form-fieldset-header {
       position: relative;
       width: 100%;
       margin-bottom: 1rem;
       display: flex;
     }
+
     .rd-form-fieldset-double-input-wrapper {
       position: relative;
       width: 100%;
@@ -507,21 +412,25 @@ onMounted(async () => {
       justify-content: space-between;
       flex-direction: row;
     }
+
     .rd-form-fieldset-input-wrapper {
       position: relative;
       width: 100%;
       display: flex;
       justify-content: space-between;
+
       .rd-fieldset-input {
         width: 100%;
       }
     }
+
     .rd-form-fieldset-body {
       position: relative;
       width: 100%;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
+
       .rd-form-fieldset-item-empty {
         position: relative;
         width: 100%;
@@ -532,10 +441,12 @@ onMounted(async () => {
         flex-shrink: 0;
         justify-content: center;
         align-items: center;
+
         span.rd-form-fieldset-item-placeholder {
           position: relative;
           opacity: 0.5;
         }
+
         &::before {
           content: "";
           position: absolute;
@@ -549,6 +460,7 @@ onMounted(async () => {
           opacity: 0.05;
         }
       }
+
       .rd-form-fieldset-item {
         position: relative;
         width: 100%;
@@ -558,6 +470,7 @@ onMounted(async () => {
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
+
         .rd-form-fieldset-item-header {
           position: relative;
           width: 100%;
@@ -566,12 +479,14 @@ onMounted(async () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
+
           .rd-form-fieldset-item-header-details {
             position: relative;
             height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
+
             span.rd-form-fieldset-item-placeholder {
               position: relative;
               margin-top: 0.125rem;
@@ -579,6 +494,7 @@ onMounted(async () => {
             }
           }
         }
+
         .rd-form-fieldset-item-body {
           position: relative;
           width: 100%;
@@ -586,6 +502,7 @@ onMounted(async () => {
           display: flex;
           justify-content: space-between;
         }
+
         .rd-form-fieldset-item-footer {
           position: relative;
           width: 100%;
@@ -593,11 +510,13 @@ onMounted(async () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
+
           span.rd-form-fieldset-item-placeholder {
             position: relative;
             opacity: 0.5;
           }
         }
+
         &::before {
           content: "";
           position: absolute;
@@ -610,9 +529,11 @@ onMounted(async () => {
           box-sizing: border-box;
           opacity: 0.05;
         }
+
         &:last-child {
           margin: 0;
         }
+
         &.rd-form-fieldset-item-decoy {
           pointer-events: none;
           position: absolute;
@@ -622,6 +543,7 @@ onMounted(async () => {
           transform: scale(0.875);
         }
       }
+
       .rd-form-fieldset-detail {
         position: relative;
         width: 100%;
@@ -629,17 +551,20 @@ onMounted(async () => {
         display: flex;
         justify-content: space-between;
         align-items: center;
+
         span.rd-form-fieldset-placeholder {
           position: relative;
           opacity: 0.5;
         }
       }
     }
+
     .rd-input-button-container {
       display: flex;
       position: relative;
       width: 18rem;
     }
+
     .rd-form-fieldset-divider {
       position: relative;
       left: -0.75rem;
@@ -649,24 +574,28 @@ onMounted(async () => {
       opacity: 0.05;
       margin: 1rem 0;
     }
+
     .rd-form-fieldset-footer {
       position: relative;
       width: 100%;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
+
       .rd-form-fieldset-detail {
         position: relative;
         width: 100%;
         height: 1rem;
         display: flex;
         justify-content: space-between;
+
         span.rd-form-fieldset-placeholder {
           position: relative;
           opacity: 0.5;
         }
       }
     }
+
     &::before {
       content: "";
       position: absolute;
@@ -680,6 +609,7 @@ onMounted(async () => {
       opacity: 0.05;
     }
   }
+
   .rd-form-footer {
     position: fixed;
     bottom: 0;
@@ -694,9 +624,11 @@ onMounted(async () => {
     display: flex;
     justify-content: center;
     align-items: center;
+
     .rd-form-button {
       width: 100%;
     }
+
     &::after {
       content: "";
       position: absolute;
@@ -708,6 +640,7 @@ onMounted(async () => {
       opacity: 0.05;
     }
   }
+
   @media only screen and (max-width: 1024px) {
     .rd-product-switch {
       width: calc(100% - 3rem);

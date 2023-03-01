@@ -11,12 +11,12 @@ export interface User {
   birth_date: Date;
   create_date: Date;
   status: "active" | "inactive";
+  classId?: string;
 }
 
 export interface UserMin {
   _id: string;
-  name: string;
-  image_url?: string;
+  classId: string;
 }
 
 export interface UserOverview {

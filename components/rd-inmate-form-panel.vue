@@ -1,16 +1,8 @@
 <template>
-  <rd-panel
-    class="rd-panel"
-    :label="dataInmate ? 'Ubah Berkas' : 'Tambah Berkas'"
-    :state="panelState"
-    :loading="dataLoading"
-    @exit="exit"
-  >
+  <rd-panel class="rd-panel" :label="dataInmate ? 'Ubah Berkas' : 'Tambah Berkas'" :state="panelState"
+    :loading="dataLoading" @exit="exit">
     <div class="rd-form-fieldset">
-      <div
-        class="rd-input-wrapper"
-        style="margin-bottom: 1rem; width: calc(100% + 2rem); left: -1rem"
-      >
+      <div class="rd-input-wrapper" style="margin-bottom: 1rem; width: calc(100% + 2rem); left: -1rem">
         <rd-input-images :input="fileInput" />
       </div>
       <div class="rd-form-fieldset-input-wrapper">
@@ -25,27 +17,11 @@
       <div class="rd-form-fieldset-input-wrapper">
         <rd-input-text class="rd-fieldset-input" :input="NIKInput" />
       </div>
-      <rd-input-text
-        class="rd-fieldset-input"
-        :input="pobInput"
-        style="margin-right: 1rem"
-      />
+      <rd-input-text class="rd-fieldset-input" :input="pobInput" style="margin-right: 1rem" />
       <div class="rd-form-fieldset-double-input-wrapper">
-        <rd-input-text
-          style="width: 25%"
-          class="rd-fieldset-input"
-          :input="dobInput"
-        />
-        <rd-input-option
-          style="width: 50%"
-          class="rd-fieldset-input"
-          :input="monthInput"
-        />
-        <rd-input-text
-          style="width: 20%"
-          class="rd-fieldset-input"
-          :input="yearInput"
-        />
+        <rd-input-text style="width: 25%" class="rd-fieldset-input" :input="dobInput" />
+        <rd-input-option style="width: 50%" class="rd-fieldset-input" :input="monthInput" />
+        <rd-input-text style="width: 20%" class="rd-fieldset-input" :input="yearInput" />
       </div>
 
       <div class="rd-form-fieldset-input-wrapper">
@@ -56,69 +32,42 @@
       </div>
       <div class="rd-form-fieldset-double-input-wrapper">
         <div class="rd-form-fieldset-input-wrapper">
-          <rd-input-text
-            class="rd-fieldset-input"
-            :input="cityInput"
-            style="margin-right: 0.5rem"
-          />
+          <rd-input-text class="rd-fieldset-input" :input="cityInput" style="margin-right: 0.5rem" />
         </div>
         <div class="rd-form-fieldset-input-wrapper">
-          <rd-input-text
-            class="rd-fieldset-input"
-            :input="districtInput"
-            style="margin-left: 0.5rem"
-          />
+          <rd-input-text class="rd-fieldset-input" :input="districtInput" style="margin-left: 0.5rem" />
         </div>
       </div>
       <div class="rd-form-fieldset-input-wrapper">
         <rd-input-option class="rd-fieldset-input" :input="catInput" />
       </div>
       <div class="rd-form-fieldset-double-input-wrapper">
-        <rd-input-text
-          style="width: 25%"
-          class="rd-fieldset-input"
-          :input="dateInsideInput"
-        />
-        <rd-input-option
-          style="width: 50%"
-          class="rd-fieldset-input"
-          :input="monthInsideInput"
-        />
-        <rd-input-text
-          style="width: 20%"
-          class="rd-fieldset-input"
-          :input="yearInsideInput"
-        />
+        <rd-input-text style="width: 25%" class="rd-fieldset-input" :input="dateInsideInput" />
+        <rd-input-option style="width: 50%" class="rd-fieldset-input" :input="monthInsideInput" />
+        <rd-input-text style="width: 20%" class="rd-fieldset-input" :input="yearInsideInput" />
       </div>
       <div class="rd-form-fieldset-input-wrapper">
         <rd-input-text class="rd-fieldset-input" :input="notesInput" />
       </div>
     </div>
     <!-- <div class="rd-input-button-container"> -->
-    <rd-input-button
-      class="rd-form-button"
-      style="margin: 0 2rem"
-      :loading="submitLoading"
-      :disabled="
-        !nameInput.model ||
-        !regInput.model ||
-        !aliasInput.model ||
-        !NIKInput.model ||
-        !pobInput.model ||
-        !dobInput.model ||
-        !yearInput.model ||
-        !monthInput.model ||
-        !monthInsideInput.model ||
-        !dateInsideInput.model ||
-        !yearInsideInput.model ||
-        !addressInput.model ||
-        !cityInput.model ||
-        !sexInput.model ||
-        !catInput
-      "
-      :label="'Submit'"
-      @clicked="submit()"
-    />
+    <rd-input-button class="rd-form-button" style="margin: 0 2rem" :loading="submitLoading" :disabled="
+      !nameInput.model ||
+      !regInput.model ||
+      !aliasInput.model ||
+      !NIKInput.model ||
+      !pobInput.model ||
+      !dobInput.model ||
+      !yearInput.model ||
+      !monthInput.model ||
+      !monthInsideInput.model ||
+      !dateInsideInput.model ||
+      !yearInsideInput.model ||
+      !addressInput.model ||
+      !cityInput.model ||
+      !sexInput.model ||
+      !catInput
+    " :label="'Submit'" @clicked="submit()" />
     <!-- </div> -->
   </rd-panel>
 </template>
@@ -559,17 +508,17 @@ async function submit(): Promise<void> {
 
   const date_of_birth = Date.parse(
     year.value +
-      "-" +
-      (months.indexOf(month.value) + 1) +
-      "-" +
-      dateOfBirth.value
+    "-" +
+    (months.indexOf(month.value) + 1) +
+    "-" +
+    dateOfBirth.value
   );
   const date_inside = Date.parse(
     yearInside.value +
-      "-" +
-      (months.indexOf(monthInside.value) + 1) +
-      "-" +
-      dateInside.value
+    "-" +
+    (months.indexOf(monthInside.value) + 1) +
+    "-" +
+    dateInside.value
   );
 
   for (const image_url of file.value || []) {
@@ -804,11 +753,13 @@ watch(
 
 <style lang="scss" scoped>
 .rd-panel {
-  width: 20rem;
+
+  // width: 20rem;
   .rd-product-switch {
     width: calc(100% - 2rem);
     margin: 0 1rem 1rem 1rem;
   }
+
   .rd-form-fieldset {
     position: relative;
     width: calc(100% - 2rem);
@@ -818,16 +769,19 @@ watch(
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+
     .rd-input-wrapper {
       width: 100%;
       position: relative;
     }
+
     .rd-form-fieldset-header {
       position: relative;
       width: 100%;
       margin-bottom: 1rem;
       display: flex;
     }
+
     .rd-form-fieldset-double-input-wrapper {
       position: relative;
       width: 100%;
@@ -835,21 +789,25 @@ watch(
       justify-content: space-between;
       flex-direction: row;
     }
+
     .rd-form-fieldset-input-wrapper {
       position: relative;
       width: 100%;
       display: flex;
       justify-content: space-between;
+
       .rd-fieldset-input {
         width: 100%;
       }
     }
+
     .rd-form-fieldset-body {
       position: relative;
       width: 100%;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
+
       .rd-form-fieldset-item-empty {
         position: relative;
         width: 100%;
@@ -860,10 +818,12 @@ watch(
         flex-shrink: 0;
         justify-content: center;
         align-items: center;
+
         span.rd-form-fieldset-item-placeholder {
           position: relative;
           opacity: 0.5;
         }
+
         &::before {
           content: "";
           position: absolute;
@@ -877,6 +837,7 @@ watch(
           opacity: 0.05;
         }
       }
+
       .rd-form-fieldset-item {
         position: relative;
         width: 100%;
@@ -886,6 +847,7 @@ watch(
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
+
         .rd-form-fieldset-item-header {
           position: relative;
           width: 100%;
@@ -894,12 +856,14 @@ watch(
           display: flex;
           justify-content: space-between;
           align-items: center;
+
           .rd-form-fieldset-item-header-details {
             position: relative;
             height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
+
             span.rd-form-fieldset-item-placeholder {
               position: relative;
               margin-top: 0.125rem;
@@ -907,6 +871,7 @@ watch(
             }
           }
         }
+
         .rd-form-fieldset-item-body {
           position: relative;
           width: 100%;
@@ -914,6 +879,7 @@ watch(
           display: flex;
           justify-content: space-between;
         }
+
         .rd-form-fieldset-item-footer {
           position: relative;
           width: 100%;
@@ -921,11 +887,13 @@ watch(
           display: flex;
           justify-content: space-between;
           align-items: center;
+
           span.rd-form-fieldset-item-placeholder {
             position: relative;
             opacity: 0.5;
           }
         }
+
         &::before {
           content: "";
           position: absolute;
@@ -938,9 +906,11 @@ watch(
           box-sizing: border-box;
           opacity: 0.05;
         }
+
         &:last-child {
           margin: 0;
         }
+
         &.rd-form-fieldset-item-decoy {
           pointer-events: none;
           position: absolute;
@@ -950,6 +920,7 @@ watch(
           transform: scale(0.875);
         }
       }
+
       .rd-form-fieldset-detail {
         position: relative;
         width: 100%;
@@ -957,17 +928,20 @@ watch(
         display: flex;
         justify-content: space-between;
         align-items: center;
+
         span.rd-form-fieldset-placeholder {
           position: relative;
           opacity: 0.5;
         }
       }
     }
+
     .rd-input-button-container {
       display: flex;
       position: relative;
       width: 18rem;
     }
+
     .rd-form-fieldset-divider {
       position: relative;
       left: -0.75rem;
@@ -977,24 +951,28 @@ watch(
       opacity: 0.05;
       margin: 1rem 0;
     }
+
     .rd-form-fieldset-footer {
       position: relative;
       width: 100%;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
+
       .rd-form-fieldset-detail {
         position: relative;
         width: 100%;
         height: 1rem;
         display: flex;
         justify-content: space-between;
+
         span.rd-form-fieldset-placeholder {
           position: relative;
           opacity: 0.5;
         }
       }
     }
+
     &::before {
       content: "";
       position: absolute;
@@ -1008,6 +986,7 @@ watch(
       opacity: 0.05;
     }
   }
+
   .rd-form-footer {
     position: fixed;
     bottom: 0;
@@ -1022,9 +1001,11 @@ watch(
     display: flex;
     justify-content: center;
     align-items: center;
+
     .rd-form-button {
       width: 100%;
     }
+
     &::after {
       content: "";
       position: absolute;
@@ -1036,6 +1017,7 @@ watch(
       opacity: 0.05;
     }
   }
+
   @media only screen and (max-width: 1024px) {
     .rd-product-switch {
       width: calc(100% - 3rem);

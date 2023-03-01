@@ -1,5 +1,5 @@
 import { CookieRef } from "nuxt/dist/app/composables";
-import { User } from "~~/interfaces/user";
+import { User, UserRequest } from "~~/interfaces/user";
 
 export default () => {
   const { $setDefaults, $fetch } = useNuxtApp();
@@ -10,8 +10,9 @@ export default () => {
   const rtkCookie: CookieRef<string> = useCookie<string>("rtk", {
     maxAge: 86400,
   });
-
+  let usersData = [];
   const user = useState<User>("user", () => null);
+  const users = useState<User[]>("users", () => null);
 
   const login = async (email: string, password: string): Promise<User> => {
     try {
@@ -31,14 +32,97 @@ export default () => {
         },
       });
       user.value = result.user;
-      console.log(user.value)
-      console.log(result.user)
       return result.user;
     } catch {
       return null;
     }
   };
+  const signup = async (email: string, password: string, nim: string, uname: string, name: string ): Promise<string> => {
+    try {
+      const response: Response = await $fetch(
+        `${config.public.apiBase}/users`,
+        "post",
+        JSON.stringify({ email, password, nim, uname, name})
+      );
+      const results: string = await response.text();
+      console.log(results)
+      return results;
+    } catch {
+      return null;
+    }
+  };
+  const enrollClass = async (classId: string): Promise<string> => {
+    try {
+      const response: Response = await $fetch(
+        `${config.public.apiBase}/users/enroll`,
+        "put",
+        JSON.stringify({ classId })
+      );
+      const results: string = await response.text();
+      console.log("results enroll")
+      console.log(results)
+      return results;
+    } catch {
+      return null;
+    }
+  };
+  const getUsers = async (): Promise<User[]> => {
+    try {
+      const response: Response = await $fetch(
+        `${config.public.apiBase}/users`,
+        "get"
+      );
+      if (response.status !== 200) throw new Error("");
 
+      const result: User[] = await response.json();
+      users.value = result;
+      usersData = result;
+            return result;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const updateUser = async (payload: UserRequest): Promise<string> => {
+    try {
+      const response: Response = await $fetch(
+        `${config.public.apiBase}/users/${payload._id}`,
+        "put",
+        JSON.stringify({
+          // role_id: payload.role_id,
+          // branch_id: payload.branch_id,
+          name: payload.name,
+          email: payload.email,
+          password: payload.password,
+          old_password: payload.old_password,
+          // birth_date: payload.birth_date,
+          // phone: payload.phone,
+        })
+      );
+
+      console.log("response");
+      console.log(response);
+      console.log("response.text()");
+      console.log(response.text() + "sad");
+      if (response.status !== 201) {
+        throw new Error("");
+      } else {
+        await $fetch(
+          `${config.public.apiBase}/logs`,
+          "post",
+          JSON.stringify({
+            registration: "-",
+            type: "password",
+          })
+        );
+      }
+      return "SUCCESS";
+    } catch (e) {
+      console.log("e");
+      console.log(e);
+      return "INVALID";
+    }
+  };
   const refresh = async (): Promise<User> => {
     try {
       if (!rtkCookie.value) throw new Error("");
@@ -76,5 +160,5 @@ export default () => {
     user.value = null;
   };
 
-  return { user, login, logout, refresh };
+  return { user, users,usersData, updateUser,  login, logout, refresh, signup, enrollClass, getUsers };
 };
