@@ -42,7 +42,7 @@ export default () => {
       const response: Response = await $fetch(
         `${config.public.apiBase}/users`,
         "post",
-        JSON.stringify({ email, password, nim, uname, name})
+        JSON.stringify({ email, password, nim, username:uname, name})
       );
       const results: string = await response.text();
       console.log(results)

@@ -33,7 +33,7 @@
           </div>
           <div v-if="dropDownState" class="actions-container" @focusout="dropDownCloser()">
             <div ripple class="action"
-              @click="dropDownState = false, panelHandler({ state: 'show', type: 'rd-user-form' })">
+              @click="dropDownState = false, panelHandler({ state: 'show', type: 'user-form', data: user, })">
               <div class="rd-icon-container">
                 <rd-svg class="icon" :name="'account'" :color="dropDownState ? 'primary' : 'primary'" />
               </div>
@@ -55,11 +55,12 @@
       </main>
       <rd-add-class-panel v-if="panelOpened === 'add-class-form'" :state="panelState" :data="panelData[0]"
         @exit="panelHandler({ state: 'hide' })" />
-      <rd-user-form-panel v-if="panelOpened === 'rd-user-form'" :state="panelState" :data="panelData[0]"
+      <rd-user-form-panel v-if="panelOpened === 'user-form'" :state="panelState" :data="panelData[0]"
         @exit="panelHandler({ state: 'hide' })" />
       <rd-analytics v-if="user && route.path !== '/login'" :state="panelState" :data="panelData[0]"
         @exit="panelHandler({ state: 'hide' })" />
-      <!-- <rd-inmate-form-panel :state="panelState" :data="panelData[0]" @exit="panelHandler({ state: 'hide' })" /> -->
+      <rd-class-configure-panel v-if="panelOpened === 'class-configure'" :state="panelState" :data="panelData[0]"
+        @exit="panelHandler({ state: 'hide' })" />
     </section>
   </div>
 </template>
@@ -88,7 +89,8 @@ interface PanelHandlerOption {
 type PanelType =
   | "attendance"
   | "logs"
-  | "rd-user-form"
+  | "user-form"
+  | "class-configure"
   | "login-form"
   | "user-form"
   | "employee-role-form"
@@ -498,6 +500,10 @@ function overviewHandler(state: "show" | "hide", cb?: () => void): void {
 }
 
 function panelHandler({ state, type, data }: PanelHandlerOption): void {
+  console.log("state")
+  console.log(state)
+  console.log("type")
+  console.log(type)
   if (state === "show") {
     panelSequence.value.unshift(type);
     if (panelSequence.value.length === 1) {

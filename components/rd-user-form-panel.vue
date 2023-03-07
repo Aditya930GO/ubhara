@@ -1,6 +1,9 @@
 <template>
   <rd-panel class="rd-panel" :label="'Ubah Password'" :state="panelState" :loading="dataLoading" @exit="emits('exit')">
     <div class="rd-input-wrapper">
+      <rd-input-text class="rd-input" :input="unameInput" />
+    </div>
+    <div class="rd-input-wrapper">
       <rd-input-text class="rd-input" :input="nameInput" />
     </div>
     <div class="rd-input-wrapper">
@@ -78,6 +81,14 @@ const statusInput = ref<InputGeneric<"active" | "inactive">>({
       value: "inactive",
     },
   ],
+});
+const unameInput = ref<InputOption>({
+  name: "name",
+  disabled: true,
+  placeholder: "John doe",
+  model: "",
+  label: "Username",
+  error: "",
 });
 const nameInput = ref<InputOption>({
   name: "name",
@@ -188,6 +199,7 @@ onMounted(async () => {
     fileInput.value.image_url = props.data.image_url
       ? `${config.public.apiBase}/files${props.data.image_url}`
       : "";
+    unameInput.value.model = props.data.username;
     nameInput.value.model = props.data.name;
     emailInput.value.model = props.data.email;
     phoneInput.value.model = props.data.phone;

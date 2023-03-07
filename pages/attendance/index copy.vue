@@ -22,7 +22,7 @@
               <th>10</th>
               <th>11</th>
               <th>12</th>
-              <th class="missed-col">Days Missed</th>
+              <th class="missed-col">Days Missed-col</th>
             </tr>
           </thead>
           <tbody>
@@ -431,11 +431,13 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
 
-  .rd-subpage-header {
+  .rd-page-header {
+    z-index: 99;
+    background: var(--background-depth-one-color);
     position: relative;
     width: calc(100% - 1rem);
     height: 2rem;
-    padding: 0 2rem;
+    padding: 0 2rem 1rem 2rem;
     box-sizing: border-box;
     display: flex;
     justify-content: space-between;

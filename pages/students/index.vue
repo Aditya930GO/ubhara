@@ -3,8 +3,7 @@
     <div class="rd-subpage-container">
       <div class="rd-subpage">
         <div class="rd-subpage-header">
-          <h1 class="rd-subpage-header-tittle rd-headline-2">{{ user.role === 'student' ? 'Daftar Kelas' : 'Kelas Aktif'
-          }}</h1>
+          <h1 class="rd-subpage-header-tittle rd-headline-2">Daftar Mahasiswa</h1>
           <div class="rd-subpage-header-button">
             <rd-input-button v-if="viewMode === 'desktop'" class="rd-subpage-body-button" label="Tambah" icon="plus"
               type="primary" @clicked="emits('open-panel', { state: 'show', type: 'add-class-form' })" />
@@ -12,7 +11,7 @@
         </div>
         <div class="rd-subpage-body">
           <div ref="rdClassWrapper" class="rd-class-wrapper">
-            <rd-active-class v-for="(classRoom, i) in classes" :key="i" class="rd-class" :index="i" :data="classRoom"
+            <rd-active-students v-for="(classRoom, i) in classes" :key="i" class="rd-class" :index="i" :data="classRoom"
               @open-panel="emits('open-panel', { state: 'show', type: 'add-class-form', data: classRoom })" />
           </div>
         </div>
@@ -549,11 +548,11 @@ onMounted(() => {
           position: relative;
           width: 100%;
           display: flex;
-          gap: 1rem;
+          gap: 0.175rem;
           flex-wrap: wrap;
 
           .rd-class {
-            width: calc((100% - 2rem) / 3);
+            width: calc(100%);
           }
         }
 

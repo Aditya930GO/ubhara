@@ -1,46 +1,12 @@
 <template>
   <div class="rd-component" ref="rdComponent">
-    <div class="rd-class-header">
-      <div class="rd-class-name-container" @clicked="emits('open-panel')">
-        <span class="rd-class-name rd-headline-3">{{ props.data.name }}</span>
-        <div class="rd-class-tags-container">
-          <div v-for="(classRoom, i) in userDatas.tags" :key="i" class="rd-class-tags-box">
-            <span class="rd-class-tags rd-subtitle-text">{{ classRoom }}
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="rd-class-header-button-container">
-        <button class="rd-class-action" @focusout="dropDownCloser()" @click="dropDownState ? (dropDownState = false) : (dropDownState = true)
-        " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
-          <rd-svg name="dots-horizontal" color="secondary" />
-        </button>
-      </div>
-      <div v-if="dropDownState" class="actions-container" @focusout="dropDownCloser()">
-        <div v-if="user.role === 'student'" ripple class="action" @click="dropDownState = false, submitEnrollClass()">
-          <div class="rd-icon-container">
-            <rd-svg class="icon" :name="'open-in-app'" :color="dropDownState ? 'primary' : 'primary'" />
-          </div>
-          <span class="name">Enroll class</span>
-        </div>
-        <div v-if="user.role !== 'student'" ripple class="action" @click="emits('open-panel'), dropDownState = false">
-          <div class="rd-icon-container">
-            <rd-svg class="icon" :name="'account'" :color="dropDownState ? 'primary' : 'primary'" />
-          </div>
-          <span class="name">Ubah kelas</span>
-        </div>
-        <div v-if="user.role !== 'student'" ripple class="action" @clicked="emits('open-panel'), dropDownState = false">
-          <div class="rd-icon-container">
-            <rd-svg class="icon" :name="'close'" :color="dropDownState ? 'primary' : 'primary'"
-              :style="dropDownState ? 'transform: rotate(180deg)' : ''" />
-          </div>
-          <span class="name">Hapus kelas</span>
-        </div>
-      </div>
-    </div>
-    <!-- <div class="rd-product-divider"></div>
-     -->
     <div class="rd-class-body">
+      <div class="rd-class-name-container">
+        <span class="rd-class-name rd-headline-3">{{ props.data.name }}</span>
+      </div>
+      <div class="rd-class-name-container">
+        <span class="rd-class-name rd-headline-3">{{ props.data.name }}</span>
+      </div>
       <div class="rd-class-details">
         <div class="rd-class-schedule">
           <div class="rd-class-schedule-left">
@@ -153,13 +119,14 @@ onMounted(() => {
 .rd-component {
   position: relative;
   width: 100%;
-  border-radius: 1rem;
+  height: 2.5rem;
+  border-radius: 0.175rem;
   background: var(--background-depth-one-color);
   box-shadow: var(--box-shadow);
-  opacity: 0;
+  opacity: 1;
   display: flex;
-  flex-direction: column;
-  transform: scale(0.875);
+  flex-direction: row;
+  // transform: scale(0.875);
 
   .rd-class-header {
     position: relative;
@@ -282,163 +249,89 @@ onMounted(() => {
     }
   }
 
-  .rd-class-image-container {
-    position: relative;
-    width: 4rem;
-    height: 4rem;
-    background: var(--background-depth-two-color);
-    border-radius: 0.75rem;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 
-    img.rd-class-image {
+  .rd-class-body {
+    position: relative;
+    width: 100%;
+    // padding: 1rem;
+    flex-direction: row;
+    display: flex;
+
+    // flex-wrap: wrap;
+    // box-sizing: border-box;
+    .rd-class-name-container {
       position: relative;
-      width: 100%;
+      width: 30%;
       height: 100%;
-      object-fit: cover;
-    }
-  }
-
-  .rd-class-name-container {
-    position: relative;
-    width: calc(100% - 4rem);
-    height: 100%;
-    padding: 1rem;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    cursor: pointer;
-
-    span.rd-class-name {
-      position: relative;
+      padding: 0.75rem;
       display: flex;
-      flex-wrap: wrap;
-    }
+      flex-direction: column;
 
-    .rd-class-tags-container {
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-start;
-      width: 100%;
-      height: 1rem;
-      margin-top: 0.25rem;
-
-      .rd-class-tags-box {
-        display: inline;
-        display: flex;
+      span.rd-class-name {
         position: relative;
-        // flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        // width: a;
-        background-color: #4847462e;
-        align-items: center;
-        border-radius: 1.5rem;
-        margin-right: 0.25rem;
-        // padding-left: 0.35rem;
+        display: flex;
+        flex-wrap: wrap;
+      }
+    }
 
-        span.rd-class-tags {
+
+    .rd-class-details {
+      position: relative;
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+
+      .rd-class-schedule,
+      .rd-class-participant {
+        flex-direction: row;
+        position: relative;
+        display: flex;
+        width: 50%;
+        flex-direction: row;
+
+        .rd-class-schedule-left,
+        .rd-class-participant-left {
+          position: relative;
+          width: 2rem;
+          height: 2rem;
+          border-radius: 0.5rem;
+          padding: 0 0.5rem;
+          box-sizing: border-box;
+          display: flex;
           justify-content: center;
           align-items: center;
+          margin-right: 0.5rem;
+
+          &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 0.5rem;
+            background: var(--background-depth-two-color);
+          }
+        }
+
+        .rd-class-schedule-right,
+        .rd-class-participant-right {
           position: relative;
-          padding: 0 0.35rem;
+          // width: 50%;
+          display: flex;
+          flex-direction: column;
+        }
+
+        span.rd-class-placeholder {
+          position: relative;
+          opacity: 0.5;
+          margin-bottom: 0.125rem;
         }
       }
     }
   }
-}
 
-.rd-product-divider {
-  position: relative;
-  width: 100%;
-  height: 1px;
-  background: var(--font-color);
-  opacity: 0.05;
-}
 
-.rd-class-body {
-  position: relative;
-  width: 100%;
-  padding: 1rem;
-  box-sizing: border-box;
-  display: flex;
-  flex-wrap: wrap;
-
-  .rd-class-details {
-    position: relative;
-    width: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-
-    .rd-class-schedule,
-    .rd-class-participant {
-      flex-direction: row;
-      position: relative;
-      display: flex;
-      width: 50%;
-      flex-direction: row;
-
-      .rd-class-schedule-left,
-      .rd-class-participant-left {
-        position: relative;
-        width: 2rem;
-        height: 2rem;
-        border-radius: 0.5rem;
-        padding: 0 0.5rem;
-        box-sizing: border-box;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-right: 0.5rem;
-
-        &::before {
-          content: "";
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          border-radius: 0.5rem;
-          background: var(--background-depth-two-color);
-        }
-      }
-
-      .rd-class-schedule-right,
-      .rd-class-participant-right {
-        position: relative;
-        // width: 50%;
-        display: flex;
-        flex-direction: column;
-      }
-
-      span.rd-class-placeholder {
-        position: relative;
-        opacity: 0.5;
-        margin-bottom: 0.125rem;
-      }
-    }
-  }
-
-  .rd-product-price {
-    position: relative;
-    width: 100%;
-    margin-top: 0.5rem;
-    display: flex;
-    flex-direction: column;
-
-    span.rd-product-placeholder {
-      position: relative;
-      opacity: 0.5;
-      margin-bottom: 0.125rem;
-    }
-
-    span.rd-product-value {
-      position: relative;
-      color: var(--primary-color);
-    }
-  }
 }
 </style>

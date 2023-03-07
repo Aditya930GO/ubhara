@@ -70,7 +70,7 @@ export default () => {
 
   const getProductDetails = async (id: string): Promise<Product> => {
     try {
-      const response: Response = await $fetch(`${config.public.apiBase}/products/${id}`, 'get')
+      const response: Response = await $fetch(`${config.public.apiBase}/classes/${id}`, 'get')
       if (response.status !== 200) throw new Error('')
 
       const result: Product = await response.json()

@@ -30,7 +30,7 @@
           </div>
           <div class="rd-icon-container"></div>
           <div class="rd-count">
-            <span class="rd-value rd-headline-2">{{ userDatas.class }}</span>
+            <span class="rd-value rd-headline-2">{{ classDatas.class }}</span>
             <span class="rd-placeholder rd-caption-text">{{
               " Kelas"
             }}</span>
@@ -85,33 +85,49 @@
 <script lang="ts" setup>
 
 const { getUsers } = useUser();
+const { getClasses } = useClass();
 const rdComponent = ref<HTMLElement>(null);
 let number = 5
 let usersData = [];
+let classesData = [];
+const classDatas = ref<CLASSTYPE>({
+  class: 0,
+});
+interface CLASSTYPE {
+  class: number | any;
+}
 const userDatas = ref<USERSTYPE>({
   user: 0,
-  class: 0
 });
 interface USERSTYPE {
   user: number | any;
-  class: number | any;
 }
 
 onMounted(async () => {
   usersData = await getUsers()
-  for (const obj of usersData) {
-    if (obj.classId) { userDatas.value.class++ }
-    if (obj._id) { userDatas.value.user++ }
-  }
-  // console.log(userDatas.counter)
-  // setTimeout(() => {
-  //   usersData = users.value
-  //   for (const obj of usersData) {
-  //     if (obj._id) counter++;
-  //   }
+  classesData = await getClasses()
+  console.log("usersData")
+  console.log(usersData)
 
-  //   console.log(counter)
-  // }, 100);
+  for (const obj of usersData) {
+    if (obj._id) {
+      userDatas.value.user++
+    }
+  }
+  for (const obj of classesData) {
+    if (obj._id) {
+      classDatas.value.class++
+    }
+    // console.log(userDatas.counter)
+    // setTimeout(() => {
+    //   usersData = users.value
+    //   for (const obj of usersData) {
+    //     if (obj._id) counter++;
+    //   }
+
+    //   console.log(counter)
+    // }, 100);
+  }
 });
 </script>
 
@@ -219,7 +235,7 @@ onMounted(async () => {
         width: 50%;
         // padding: 0 0.5rem;
         margin: 0 0.5rem;
-        background-color: aquamarine;
+        background-color: var(--background-depth-two-color);
         padding: 0.75rem;
         flex-direction: column;
         position: relative;

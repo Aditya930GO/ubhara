@@ -43,7 +43,7 @@ const { getClasses, addClass, updateClass, getClassDetails } = useClass();
 
 const props = defineProps<{
   state: "idle" | "hide";
-  data?;
+  data?: string;
 }>();
 const emits = defineEmits(["exit", "update"]);
 const config = useRuntimeConfig();
@@ -312,9 +312,8 @@ async function submit(): Promise<void> {
   };
   let addID: string = "";
   if (props.data) {
-    var newTags = tags.value.replaceAll(', ', ',')
+    var newTags = tags.value.replace(' ', '')
     const payload = {
-      _id: props.data._id,
       name: name.value,
       schedule: schedule.value,
       tags: newTags,
@@ -359,15 +358,14 @@ function dateHandler(x: Date, y): string {
 // );
 onMounted(async () => {
   if (props.data) {
-    // const data = await getClassDetails(props.data);
-    console.log(props.data);
-    nameInput.value.model = props.data.name
-    tagsInput.value.model = props.data.tags
-    scheduleInput.value.model = props.data.schedule
-    notesInput.value.model = props.data.notes
-    setTimeout(() => {
-      dataLoading.value = false;
-    }, 500);
+    const data = await getClassDetails(props.data);
+    // console.log(data.date_of_birth);
+    if (data) {
+      console.log(data)
+      setTimeout(() => {
+        dataLoading.value = false;
+      }, 500);
+    }
   } else {
     setTimeout(() => {
       dataLoading.value = false;

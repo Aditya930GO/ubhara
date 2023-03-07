@@ -37,11 +37,11 @@ export default () => {
   const updateClass = async (payload, dataUpdate: boolean): Promise<string> => {
     try {
       if (dataUpdate) {
-        const response: Response = await $fetch(`${config.public.apiBase}/products/${payload._id}`, 'put', JSON.stringify({
+        const response: Response = await $fetch(`${config.public.apiBase}/classes/${payload._id}`, 'put', JSON.stringify({
           name: payload.name,
-          price: payload.price,
-          sku: payload.sku,
-          category: payload.category,
+          tags: payload.tags,
+          schedule: payload.schedule,
+          notes: payload.notes,
         }))
         if (response.status !== 200) throw new Error('')
       }
@@ -64,12 +64,12 @@ export default () => {
     }
   }
 
-  const getClassDetails = async (id: string): Promise<Product> => {
+  const getClassDetails = async (id: string) => {
     try {
-      const response: Response = await $fetch(`${config.public.apiBase}/products/${id}`, 'get')
+      const response: Response = await $fetch(`${config.public.apiBase}/classes/${id}`, 'get')
       if (response.status !== 200) throw new Error('')
-
-      const result: Product = await response.json()
+      const result = await response.json()
+      console.log(result)
       return result
     } catch (e) {
       return null

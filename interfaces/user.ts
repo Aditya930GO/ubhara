@@ -4,6 +4,7 @@ import { UserRoleAction } from "./user-role";
 export interface User {
   _id: string;
   name: string;
+  username: string;
   role: string;
   email: string;
   phone?: string;
