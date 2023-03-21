@@ -1,19 +1,21 @@
 <template>
   <div class="rd-container" ref="rdContainer">
-    <div class="rd-subpage-container">
+    <div class="rd-subpage-container" :style="viewMode === 'mobile' ? 'width: 100%; padding: 0.5rem;' : ''">
       <div class="rd-subpage">
         <div class="rd-subpage-header">
-          <h1 class="rd-subpage-header-tittle rd-headline-2">{{ user.role === 'student' ? 'Daftar Kelas' : 'Kelas Aktif'
+          <h1 class="rd-subpage-header-tittle rd-headline-2">{{ user.role === 'student' ? 'Kelas Anda' : 'Kelas Aktif'
           }}</h1>
           <div class="rd-subpage-header-button">
             <rd-input-button v-if="viewMode === 'desktop'" class="rd-subpage-body-button" label="Tambah" icon="plus"
               type="primary" @clicked="emits('open-panel', { state: 'show', type: 'add-class-form' })" />
           </div>
         </div>
-        <div class="rd-subpage-body">
-          <div ref="rdClassWrapper" class="rd-class-wrapper">
+        <div class="rd-subpage-body" :style="viewMode === 'mobile' ? 'width: 100%; padding: 0.5rem;' : ''">
+          <div ref="rdClassWrapper" class="rd-class-wrapper"
+            :style="viewMode === 'mobile' ? 'width: 100%; padding: 0.5rem;' : ''">
             <rd-active-class v-for="(classRoom, i) in classes" :key="i" class="rd-class" :index="i" :data="classRoom"
-              @open-panel="emits('open-panel', { state: 'show', type: 'add-class-form', data: classRoom })" />
+              @open-panel="emits('open-panel', { state: 'show', type: 'add-class-form', data: classRoom })"
+              :style="viewMode === 'mobile' ? 'width: 80%; padding: 0.15rem;' : ''" />
           </div>
         </div>
       </div>
@@ -25,15 +27,6 @@
 <script lang="ts" setup>
 import gsap from "gsap";
 import { ComputedRef } from "vue";
-import {
-  InputGeneric,
-  InputOption,
-  InputSearchOption,
-} from "~~/interfaces/general";
-import {
-  TransactionOverview,
-  TransactionQuery,
-} from "~~/interfaces/transaction";
 
 definePageMeta({
   middleware: ["auth"],
@@ -42,20 +35,10 @@ definePageMeta({
 const { user } = useUser();
 const { classes, getClasses } = useClass();
 const route = useRoute();
-const emits = defineEmits(["logout", "open-panel"]);
+const emits = defineEmits(["logout", "open-panel", "navigate"]);
 const { viewMode } = useMain();
 const router = useRouter();
 const rdContainer = ref<HTMLDivElement>(null);
-const rdPageHeader = ref<HTMLDivElement>(null);
-const rdTransactionsOverviewContainer = ref<HTMLDivElement>(null);
-const rdTransactionsFilterDropdown = ref<HTMLDivElement>(null);
-const rdTransactionsFilterContainer = ref<HTMLDivElement>(null);
-const rdTransactionsWrapper = ref<HTMLDivElement>(null);
-
-const transactionsOverview = ref<TransactionOverview[]>(null);
-const transactionsSearchTimeout = ref<NodeJS.Timeout>(null);
-const transactionsInitLoading = ref<boolean>(true);
-const transactionsInitAnimating = ref<boolean>(true);
 
 const animate = {
   init(
@@ -134,28 +117,21 @@ function loadTransactions(text?: string): void {
   }, 250);
 }
 
-// watch(
-//   () => search.value,
-//   (val) => {
-//     clearTimeout(transactionsSearchTimeout.value);
-//     transactionsSearchTimeout.value = setTimeout(() => {
-//       loadTransactions(val || "");
-//       loadInmates(val || "");
-//     }, 500);
-//   }
-// );
 
 onMounted(() => {
   setTimeout(async () => {
-    console.log(user.value.role)
-    if (user.value.role !== "admin") router.push("/login");
+    // console.log(user.value.role)
+    await getClasses();
+    console.log(classes.value)
+    // console.log(classes)
+    // if (user.value.role === "admin") await getClasses();
+    // if (user.value.role !== "admin") router.push("/login");
     // transactionsOverview.value = await getTransactionOverview();
-    getClasses();
-    animate.init(
-      rdPageHeader.value,
-      rdTransactionsFilterContainer.value,
-      rdTransactionsOverviewContainer.value
-    );
+    // animate.init(
+    //   rdPageHeader.value,
+    //   rdTransactionsFilterContainer.value,
+    //   rdTransactionsOverviewContainer.value
+    // );
   }, 250);
 });
 </script>

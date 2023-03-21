@@ -1,14 +1,17 @@
-import { Product, ProductMin, ProductRequest, ProductQuery } from "~~/interfaces/product"
-import { ProductStockRequest } from "~~/interfaces/product-stock"
+
+import { saveAs } from 'file-saver';
+// const fileSaver = require('file-saver');
 
 export default () => {
+  // var FileSaver = require('file-saver');
   const { $fetch } = useNuxtApp()
   const config = useRuntimeConfig()
+  // const fileSaver = require("file-saver");
 
-  const classes = useState<Product[]>('classes', () => null)
+  const classes = useState('classes', () => null)
  
   const loading = useState<boolean>('products-loading', () => false)
-  const query = useState<ProductQuery>('products-query', () => {
+  const query = useState('products-query', () => {
     return {
       sort: 'name-ascending',
       skip: 0,
@@ -50,9 +53,50 @@ export default () => {
       return null
     }
   }
+  
 
+  const exportClasses = async ( id: string) => {
+    try {
+      console.log("mulai")
+      console.log(id)
+      // const fileSaver = require('file-saver');
+      // console.log("sa", fileSaver)
+      const urlString: string = `${config.public.apiBase}/attendances/excel/${id}`
+      // const { data } = await useAsyncData('count', () => $fetch(urlString, 'get'))
+      const response = await $fetch(urlString, 'get')
+      // const result: [] = await response.json()
+      const result: string = await response.text()
+      // const result = response.json()
+      // console.log(response.body.toString())
+      // const { data } = await $axios({
+      //   url: `${config.public.apiBase}/attendances/excel/`,
+      //   method: "GET",
+      //   responseType: "blob",
+      // });
+      // if (response.status !== 200) throw new Error('')
+      console.log("result")
+      console.log(result)
+      var FileSaver = require('file-saver');
+      // var blob = new Blob( data, { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      // console.log("blob")
+      // console.log(blob)
+      FileSaver.saveAs(result, "hello worldss.xls");
 
-  const getClasses = async ( text?: string): Promise<Product[]> => {
+      // let filename = "absensi";
+      // var blob = new Blob(response,  {type: "text/plain;charset=utf-8"} )
+
+      // FileSaver.saveAs(response, );
+      // console.log(response)
+      
+      // const urlString: string = `${config.public.apiBase}/classes?${text ? `text=${text}&` : ''}${query.value.sort ? `sort=${query.value.sort}&` : ''}${query.value.skip ? `skip=${query.value.skip}&` : ''}${query.value.limit ? `limit=${query.value.limit}&` : ''}`
+      // const response: Response = await $fetch(urlString, 'get')
+      // const result: [] = await response.json()
+      return result
+    } catch (e) {
+      return null
+    }
+  }
+  const getClasses = async ( text?: string) => {
     try {
       const urlString: string = `${config.public.apiBase}/classes?${text ? `text=${text}&` : ''}${query.value.sort ? `sort=${query.value.sort}&` : ''}${query.value.skip ? `skip=${query.value.skip}&` : ''}${query.value.limit ? `limit=${query.value.limit}&` : ''}`
       const response: Response = await $fetch(urlString, 'get')
@@ -120,7 +164,7 @@ export default () => {
   //   }
   // }
 
-  return { classes,  loading, query, addClass, updateClass, getClasses, getClassDetails }
+  return { classes,  loading, query, exportClasses, addClass, updateClass, getClasses, getClassDetails }
   //categories, skus, getProductDetails,getProductsSkus, addProductStock, updateProductStock
   
 }

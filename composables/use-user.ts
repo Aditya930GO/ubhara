@@ -13,6 +13,7 @@ export default () => {
   let usersData = [];
   const user = useState<User>("user", () => null);
   const users = useState<User[]>("users", () => null);
+  const students = useState<User[]>("students", () => null);
 
   const login = async (email: string, password: string): Promise<User> => {
     try {
@@ -51,12 +52,12 @@ export default () => {
       return null;
     }
   };
-  const enrollClass = async (classId: string): Promise<string> => {
+  const enrollClass = async (class_id: string): Promise<string> => {
     try {
       const response: Response = await $fetch(
         `${config.public.apiBase}/users/enroll`,
         "put",
-        JSON.stringify({ classId })
+        JSON.stringify({ class_id })
       );
       const results: string = await response.text();
       console.log("results enroll")
@@ -78,6 +79,23 @@ export default () => {
       users.value = result;
       usersData = result;
             return result;
+    } catch (e) {
+      return null;
+    }
+  };
+  const getStudent = async (): Promise<User[]> => {
+    try {
+      const response: Response = await $fetch(
+        `${config.public.apiBase}/users`,
+        "get"
+      );
+      if (response.status !== 200) throw new Error("");
+
+      const result: User[] = await response.json();
+      students.value = result.filter(student => student.role === 'student');
+      console.log(students.value)
+      // usersData = result;
+      return result;
     } catch (e) {
       return null;
     }
@@ -160,5 +178,5 @@ export default () => {
     user.value = null;
   };
 
-  return { user, users,usersData, updateUser,  login, logout, refresh, signup, enrollClass, getUsers };
+  return { students, user, users,usersData, getStudent, updateUser,  login, logout, refresh, signup, enrollClass, getUsers };
 };

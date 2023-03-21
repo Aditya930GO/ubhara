@@ -1,4 +1,4 @@
-import { UserRoleAction } from "./user-role";
+// import { UserRoleAction } from "./user-role";
 
 
 export interface User {
@@ -12,7 +12,7 @@ export interface User {
   birth_date: Date;
   create_date: Date;
   status: "active" | "inactive";
-  classId?: string;
+  class_id?: string;
 }
 
 export interface UserMin {

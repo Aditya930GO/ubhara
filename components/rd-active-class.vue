@@ -1,35 +1,51 @@
 <template>
-  <div class="rd-component" ref="rdComponent">
+  <div v-if="(user.role === 'student' && user.class_id === props.data._id) || user.role === 'admin'" class="rd-component"
+    ref="rdComponent">
+    <!-- <div class="rd-component" ref="rdComponent"> -->
     <div class="rd-class-header">
-      <div class="rd-class-name-container" @clicked="emits('open-panel')">
+      <div class="rd-class-name-container" :class="user.role === 'student' ? 'student' : ''" @click="pindah()">
         <span class="rd-class-name rd-headline-3">{{ props.data.name }}</span>
         <div class="rd-class-tags-container">
-          <div v-for="(classRoom, i) in userDatas.tags" :key="i" class="rd-class-tags-box">
-            <span class="rd-class-tags rd-subtitle-text">{{ classRoom }}
+          <div v-for="(classRoomTags, i) in userDatas.tags" :key="i" class="rd-class-tags-box">
+            <span class="rd-class-tags rd-subtitle-text">{{ classRoomTags }}
             </span>
           </div>
         </div>
       </div>
-      <div class="rd-class-header-button-container">
+      <div v-if="(user.role === 'student' && !user.class_id) || user.role === 'admin'"
+        class="rd-class-header-button-container">
         <button class="rd-class-action" @focusout="dropDownCloser()" @click="dropDownState ? (dropDownState = false) : (dropDownState = true)
         " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
           <rd-svg name="dots-horizontal" color="secondary" />
         </button>
       </div>
       <div v-if="dropDownState" class="actions-container" @focusout="dropDownCloser()">
-        <div v-if="user.role === 'student'" ripple class="action" @click="dropDownState = false, submitEnrollClass()">
+        <div v-if="user.role === 'student' && !user.class_id" ripple class="action"
+          @click="dropDownState = false, submitEnrollClass()">
           <div class="rd-icon-container">
             <rd-svg class="icon" :name="'open-in-app'" :color="dropDownState ? 'primary' : 'primary'" />
           </div>
           <span class="name">Enroll class</span>
         </div>
-        <div v-if="user.role !== 'student'" ripple class="action" @click="emits('open-panel'), dropDownState = false">
+        <div v-if="user.role !== 'student'" ripple class="action" @mousedown="openAttendance(), dropDownState = false">
           <div class="rd-icon-container">
-            <rd-svg class="icon" :name="'account'" :color="dropDownState ? 'primary' : 'primary'" />
+            <rd-svg class="icon" :name="'check'" :color="dropDownState ? 'primary' : 'primary'" />
+          </div>
+          <span class="name">Buka absen</span>
+        </div>
+        <div v-if="user.role !== 'student'" ripple class="action" @mousedown="exportAsExcel(), dropDownState = false">
+          <div class="rd-icon-container">
+            <rd-svg class="icon" :name="'file'" :color="dropDownState ? 'primary' : 'primary'" />
+          </div>
+          <span class="name">Export Excel</span>
+        </div>
+        <div v-if="user.role !== 'student'" ripple class="action" @mousedown="emits('open-panel'), dropDownState = false">
+          <div class="rd-icon-container">
+            <rd-svg class="icon" :name="'edit-outline'" :color="dropDownState ? 'primary' : 'primary'" />
           </div>
           <span class="name">Ubah kelas</span>
         </div>
-        <div v-if="user.role !== 'student'" ripple class="action" @clicked="emits('open-panel'), dropDownState = false">
+        <div v-if="user.role !== 'student'" ripple class="action" @mousedown="emits('open-panel'), dropDownState = false">
           <div class="rd-icon-container">
             <rd-svg class="icon" :name="'close'" :color="dropDownState ? 'primary' : 'primary'"
               :style="dropDownState ? 'transform: rotate(180deg)' : ''" />
@@ -65,21 +81,37 @@
           </div>
         </div>
       </div>
+      <div class="rd-class-absent-button-container" style="justify-content: center; ">
+        <rd-input-button v-if="user.role === 'student'" style="width: 100%;" class="rd-subpage-body-button"
+          :label="userDatas.attend_status ? 'Sudah Absen' : 'Absen'" type="primary" :disabled="userDatas.attend_status"
+          @clicked="submitAttend()" />
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import gsap from "gsap";
-import { Product } from "~~/interfaces/product";
+import { ref, onMounted } from "vue";
+import { saveAs } from 'file-saver';
+import fileSaver from 'file-saver';
+
+// import fileSaver from 'file-saver'
+// import { read, utils, writeFileXLSX } from 'xlsx';
+// import * as XLSX from './xlsx.mjs';
+
+
 
 const dropDownState = ref<boolean>(false);
 const dropDownOpened = ref<boolean>(false);
 
+
+const { attendances, openClassAttendance, submitAttendance, getAttendances } = useAttendance();
+const { exportClasses } = useClass();
 const { user, users, enrollClass, getUsers } = useUser();
 const router = useRouter();
 
-const emits = defineEmits(["logout", "open-panel"]);
+const emits = defineEmits(["logout", "open-panel", "navigate"]);
 const config = useRuntimeConfig();
 const props = defineProps<{
   index: number;
@@ -87,15 +119,20 @@ const props = defineProps<{
 }>();
 
 const userDatas = ref<USERSTYPE>({
+  attendances: [],
+  attend_status: false,
   tags: {},
   user: 0,
-  class: 0
+  class: ""
 });
 interface USERSTYPE {
+  attendances: string[];
+  attend_status: boolean;
   tags: any;
   user: number | any;
-  class: number | any;
+  class: string;
 }
+
 
 let usersData = [];
 
@@ -122,6 +159,20 @@ async function submitEnrollClass() {
   }
 }
 
+function pindah(): void {
+  window.location.href = '/attendance';
+  localStorage.setItem('class_id', props.data._id)
+  localStorage.setItem('class_name', props.data.name)
+}
+async function openAttendance() {
+  console.log(props.data._id)
+  openClassAttendance(props.data._id.toLocaleString())
+}
+async function submitAttend() {
+  console.log(props.data._id)
+  const result = await submitAttendance(props.data._id.toLocaleString())
+  if (result) userDatas.value.attend_status = true
+}
 function dropDownCloser(): void {
   // console.log(props.data._id)
   setTimeout(() => {
@@ -132,17 +183,53 @@ function test(): void {
   console.log("hai")
   emits('open-panel', { state: 'show', type: 'add-class-form' })
 }
+
+async function exportAsExcel() {
+  // const result = await exportClasses(props.data._id)
+  const { $fetch } = useNuxtApp()
+  const urlString: string = `${config.public.apiBase}/attendances/excel/${props.data._id}`
+  const response = await $fetch(urlString, 'get')
+  // const { data } = await useAsyncData('count', () => $fetch(urlString, 'get'))
+  // const result: [] = await data
+  // console.log(result)
+  // console.log(data.value.toLocaleString())
+  // const {data} = await exportClasses(props.data._id)
+  // var file = new File([data], "hello world.txt", { type: "text/plain;charset=utf-8" });
+  // const fileSaver = require('file-saver');
+  // var file = new File(raesponse, "hello world.xls");
+  // var blob = new Blob(response.text());
+  fileSaver(response, "hello world.xls");
+  // FileSaver.saveAs(blob, "hello world.xls");
+}
+// // const fileSaver = require('file-saver');
+// const aduh = await exportClasses(props.data._id)
+// let filename = "absensi"
+// // fileSaver(aduh, `${filename}.xlsx`);
+// // var FileSaver = require('file-saver');
+// var blob = new Blob([aduh], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+// fileSaver.saveAs(blob, `${filename}.xlsx`);
+// this.loadingExport = true;
+// const fileSaver = require("file-saver");
+//   const { data } = await this.$axios({
+//     url: `${this.$config.apiURL}/attendances/excel/${props.data._id}`,
+//     method: "GET",
+//     responseType: "blob",
+//   });
+//   let filename = "absensi";
+
+//   fileSaver(data, `${filename}.xlsx`);
+//   // this.loadingExport = false;
+//   // this.simple = false;
+// }
 onMounted(() => {
   setTimeout(async () => {
-    await getUsers()
+
     usersData = users.value
     for (const obj of usersData) {
-      if (obj._id && obj.classId === props.data._id) userDatas.value.user++;
+      if (obj._id && obj.class_id === props.data._id) userDatas.value.user++;
     }
   }, 250);
-  userDatas.value.tags = props.data.tags.split(',')
-  console.log("props.data._id")
-  console.log(props.data)
+  userDatas.value.tags = props.data.tags?.split(',')
   setTimeout(() => {
     animate.init(rdComponent.value);
   }, 50 * props.index);
@@ -311,6 +398,11 @@ onMounted(() => {
     flex-direction: column;
     cursor: pointer;
 
+    &.student {
+      cursor: none;
+      pointer-events: none;
+    }
+
     span.rd-class-name {
       position: relative;
       display: flex;
@@ -366,12 +458,23 @@ onMounted(() => {
   display: flex;
   flex-wrap: wrap;
 
+  .rd-class-absent-button-container {
+    margin-top: 0.5rem;
+    flex-direction: row;
+    position: relative;
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+  }
+
   .rd-class-details {
     position: relative;
     width: 100%;
     display: flex;
     justify-content: flex-start;
     align-items: center;
+
+
 
     .rd-class-schedule,
     .rd-class-participant {

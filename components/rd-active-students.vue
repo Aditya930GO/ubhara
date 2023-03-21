@@ -1,43 +1,40 @@
 <template>
   <div class="rd-component" ref="rdComponent">
     <div class="rd-class-body">
-      <div class="rd-class-name-container">
-        <span class="rd-class-name rd-headline-3">{{ props.data.name }}</span>
+      <div class="rd-class-number-container">
+        <span class="rd-class-number rd-headline-3">{{ props.index + 1 }}</span>
       </div>
       <div class="rd-class-name-container">
         <span class="rd-class-name rd-headline-3">{{ props.data.name }}</span>
       </div>
-      <div class="rd-class-details">
-        <div class="rd-class-schedule">
-          <div class="rd-class-schedule-left">
-            <div class="rd-chart-header-icon-container">
-              <rd-svg class="rd-chart-header-icon" :name="'calendar-clock-outline'" color="secondary" />
-            </div>
-          </div>
-          <div class="rd-class-schedule-right">
-            <span class="rd-product-placeholder rd-headline-4">Jadwal</span>
-            <span class="rd-product-value rd-headline-5">{{ props.data.schedule }}</span>
-          </div>
-        </div>
-        <div class="rd-class-participant">
-          <div class="rd-class-participant-left">
-            <div class="rd-chart-header-icon-container">
-              <rd-svg class="rd-chart-header-icon" :name="'account-multiple'" color="secondary" />
-            </div>
-          </div>
-          <div class="rd-class-participant-right">
-            <span class="rd-product-placeholder rd-headline-4">Peserta</span>
-            <span class="rd-product-value rd-headline-5">{{ userDatas.user }}</span>
-          </div>
-        </div>
+      <div class="rd-class-name-container">
+        <span class="rd-class-name rd-headline-3">{{ props.data.nim }}</span>
       </div>
+      <div class="rd-class-name-container">
+        <span class="rd-class-name rd-headline-3">{{ props.data.nim }}</span>
+      </div>
+      <div class="rd-class-name-container">
+        <span class="rd-class-name rd-headline-3">{{ props.data.role }}</span>
+      </div>
+      <div class="rd-class-header-button-container">
+        <button class="rd-class-action" @click="emits('open-panel')
+        " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
+          <rd-svg name="pencil" color="secondary" />
+        </button>
+      </div>
+      <div class="rd-class-header-button-container">
+        <button class="rd-class-action" @click="
+              " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
+          <rd-svg name="dots-horizontal" color="secondary" />
+        </button>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import gsap from "gsap";
-import { Product } from "~~/interfaces/product";
 
 const dropDownState = ref<boolean>(false);
 const dropDownOpened = ref<boolean>(false);
@@ -106,9 +103,10 @@ onMounted(() => {
       if (obj._id && obj.classId === props.data._id) userDatas.value.user++;
     }
   }, 250);
-  userDatas.value.tags = props.data.tags.split(',')
+  // userDatas.value.tags = props.data.tags.split(',')
   console.log("props.data._id")
-  console.log(props.data)
+  console.log(props.data._id)
+  console.log(props.index)
   setTimeout(() => {
     animate.init(rdComponent.value);
   }, 50 * props.index);
@@ -253,17 +251,30 @@ onMounted(() => {
   .rd-class-body {
     position: relative;
     width: 100%;
-    // padding: 1rem;
+    height: 1rem;
     flex-direction: row;
     display: flex;
 
-    // flex-wrap: wrap;
-    // box-sizing: border-box;
+    .rd-class-number-container {
+      position: relative;
+      width: 5%;
+      height: 100%;
+      padding: 0.75rem 0 0.75rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+
+      span.rd-class-number {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+      }
+    }
+
     .rd-class-name-container {
       position: relative;
       width: 30%;
       height: 100%;
-      padding: 0.75rem;
+      padding: 0.75rem 0 0.75rem 0;
       display: flex;
       flex-direction: column;
 
@@ -274,6 +285,41 @@ onMounted(() => {
       }
     }
 
+    .rd-class-header-button-container {
+      border: 1px solid var(--primary-color);
+      position: relative;
+      height: 1.75rem;
+      width: 1.75rem;
+      border-radius: 25%;
+      overflow: hidden;
+      background: var(--background-depth-two-color);
+      display: flex;
+      flex-shrink: 0;
+      margin: 0.35rem;
+
+      >* {
+        cursor: pointer;
+        position: relative;
+        width: 1.75rem;
+        height: 1.75rem;
+        background: white;
+        border: none;
+        display: flex;
+        flex-shrink: 0;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .rd-class-action {
+        padding: 0 0.2rem;
+        box-sizing: border-box;
+        transition: background-color 0.25s;
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.05);
+        }
+      }
+    }
 
     .rd-class-details {
       position: relative;

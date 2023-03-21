@@ -1,6 +1,5 @@
 import { Branch } from "~~/interfaces/branch"
 import { ChartCashflow } from "~~/interfaces/general"
-import { Product } from "~~/interfaces/product"
 
 export default function () {
   const { $fetch } = useNuxtApp()
@@ -9,7 +8,6 @@ export default function () {
   const viewMode = useState<'desktop' | 'mobile'>('view-mode', () => null)
 
   const getOverview = async (): Promise<{
-    products: Product[]
     branches: Branch[]
     cashflow: ChartCashflow[]
     processingCount: number

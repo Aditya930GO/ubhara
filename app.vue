@@ -1,8 +1,8 @@
 <template>
   <div class="rd-layout">
     <section class="rd-body">
-      <header class="rd-body-header" v-if="user && route.path !== '/login'">
-        <div class="rd-body-header-left">
+      <header class="rd-body-header" v-if="user && route.path !== '/login' && viewMode === 'desktop'">
+        <div class="rd-body-header-left" @click="home">
           <div class="rd-body-header-logo-container">
             <img class="logo" :src="'./logo.png'" />
           </div>
@@ -39,6 +39,7 @@
               </div>
               <span class="name">Account</span>
             </div>
+
             <div ripple class="action" @click="dropDownState = false, exit()">
               <div class="rd-icon-container">
                 <rd-svg class="icon" :name="'logout'" :color="dropDownState ? 'primary' : 'primary'"
@@ -49,7 +50,54 @@
           </div>
         </div>
       </header>
+      <header class="rd-body-header" v-if="user && route.path !== '/login' && viewMode === 'mobile'"
+        style="padding-right: 0.5rem;width: 100%;">
+        <div class="rd-body-header-left" @click="home" style="padding-left: 0.5rem;width: 60%;">
+          <div class="rd-body-header-logo-container">
+            <img class="logo" :src="'./logo.png'" style="height: 2rem;" />
+          </div>
 
+          <div class="rd-body-header-details">
+            <h3 class="rd-body-header-caption rd-headline-5" style="transform: scale(80%)">
+              Sistem Informasi UBHARA
+            </h3>
+          </div>
+        </div>
+        <div class="rd-profile-container" style="padding-right: 0.5rem;width: 40%;">
+          <div class="rd-profile-details" style="width:100%;">
+            <span class="rd-profile-name rd-headline-5" style="width: 70%;align-self: flex-end;">{{
+              user.name.toUpperCase() }}</span>
+            <div class="rd-profile-roles">
+              <span class="rd-profile-role rd-headline-6">{{ user.role }}</span>
+            </div>
+          </div>
+          <div class="rd-profile-actions">
+            <button class="rd-profile-action" @focusout="dropDownCloser()" @click="
+              dropDownState ? (dropDownState = false) : (dropDownState = true)
+            " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
+              <rd-svg :name="'chevron-down'" :color="dropDownOpened ? 'white' : 'primary'"
+                :style="dropDownState ? 'transform: rotate(180deg)' : ''" />
+            </button>
+          </div>
+          <div v-if="dropDownState" class="actions-container" @focusout="dropDownCloser()">
+            <div ripple class="action"
+              @click="dropDownState = false, panelHandler({ state: 'show', type: 'user-form', data: user, })">
+              <div class="rd-icon-container">
+                <rd-svg class="icon" :name="'account'" :color="dropDownState ? 'primary' : 'primary'" />
+              </div>
+              <span class="name">Account</span>
+            </div>
+
+            <div ripple class="action" @click="dropDownState = false, exit()">
+              <div class="rd-icon-container">
+                <rd-svg class="icon" :name="'logout'" :color="dropDownState ? 'primary' : 'primary'"
+                  :style="dropDownState ? 'transform: rotate(180deg)' : ''" />
+              </div>
+              <span class="name">Logout</span>
+            </div>
+          </div>
+        </div>
+      </header>
       <main class="rd-body-content">
         <nuxt-page @open-panel="panelHandler" @logout="exit" />
       </main>
@@ -57,8 +105,8 @@
         @exit="panelHandler({ state: 'hide' })" />
       <rd-user-form-panel v-if="panelOpened === 'user-form'" :state="panelState" :data="panelData[0]"
         @exit="panelHandler({ state: 'hide' })" />
-      <rd-analytics v-if="user && route.path !== '/login'" :state="panelState" :data="panelData[0]"
-        @exit="panelHandler({ state: 'hide' })" />
+      <rd-analytics v-if="user && route.path !== '/login' && panelOpened !== 'analytics' && viewMode === 'desktop'"
+        :state="panelState" :data="panelData[0]" @exit="panelHandler({ state: 'hide' })" />
       <rd-class-configure-panel v-if="panelOpened === 'class-configure'" :state="panelState" :data="panelData[0]"
         @exit="panelHandler({ state: 'hide' })" />
     </section>
@@ -87,6 +135,7 @@ interface PanelHandlerOption {
 }
 
 type PanelType =
+  | "analytics"
   | "attendance"
   | "logs"
   | "user-form"
@@ -98,6 +147,7 @@ type PanelType =
 
 const emits = defineEmits(["logout", "open-panel", "open-panel-user"]);
 const { user, refresh, logout } = useUser();
+const { exportClasses } = useClass();
 const { viewMode } = useMain();
 const route = useRoute();
 
@@ -454,6 +504,24 @@ function selectOption(action: EmitsName): void {
   dropDownHandler("close");
   emits(action);
 }
+// async function exportAsExcel() {
+//   exportClasses()
+// }
+// async function exportAsExcel() {
+//   this.loadingExport = true;
+//   const fileSaver = require("file-saver");
+//   const { data } = await this.$axios({
+//     url: `${this.$config.apiURL}/attendances/excel/`,
+//     method: "GET",
+//     responseType: "blob",
+//   });
+//   let filename = "absensi" ;
+
+//   fileSaver(data, `${filename}.xlsx`);
+//   this.loadingExport = false;
+//   this.simple = false;
+// }
+
 
 function dropDownHandler(state: "open" | "close"): void {
   if (!dropDownAnim.value)
@@ -500,10 +568,6 @@ function overviewHandler(state: "show" | "hide", cb?: () => void): void {
 }
 
 function panelHandler({ state, type, data }: PanelHandlerOption): void {
-  console.log("state")
-  console.log(state)
-  console.log("type")
-  console.log(type)
   if (state === "show") {
     panelSequence.value.unshift(type);
     if (panelSequence.value.length === 1) {
@@ -555,9 +619,12 @@ function exit(): void {
     () => {
       logout();
       navigate("/login");
-      panelHandler({ state: "show", type: "login-form" });
+      // panelHandler({ state: "show", type: "login-form" });
     }
   );
+}
+function home() {
+  window.location.href = 'http://localhost:3000';
 }
 
 function shake(): void {
@@ -566,9 +633,14 @@ function shake(): void {
     rdLayout.value.classList.remove("rd-layout-shake");
   }, 500);
 }
-
-function navigate(to: string): void {
+function pindah(): void {
+  navigate("/attendance");
+}
+function navigate(to): void {
   navigationHandler("close");
+  console.log(to)
+  navigateTo(to);
+
   animate.exitPage(rdBody.value, () => {
     navigateTo(to);
   });
@@ -664,8 +736,10 @@ onMounted(async () => {
       // background: var(--background-depth-three-color);
 
       .rd-body-header-left {
+        user-select: none;
+        cursor: pointer;
         padding-left: 2rem;
-        width: 100%;
+        width: 40%;
         height: 100%;
         display: flex;
         flex-direction: row;
@@ -726,7 +800,7 @@ onMounted(async () => {
           margin-right: 0.5rem;
           display: flex;
           flex-direction: column;
-          justify-content: center;
+          justify-content: flex-end;
           align-items: flex-end;
 
           span.rd-profile-name {

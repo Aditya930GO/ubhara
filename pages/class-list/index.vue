@@ -36,10 +36,6 @@ import {
   InputOption,
   InputSearchOption,
 } from "~~/interfaces/general";
-import {
-  TransactionOverview,
-  TransactionQuery,
-} from "~~/interfaces/transaction";
 
 definePageMeta({
   middleware: ["auth"],
@@ -58,7 +54,6 @@ const rdTransactionsFilterDropdown = ref<HTMLDivElement>(null);
 const rdTransactionsFilterContainer = ref<HTMLDivElement>(null);
 const rdTransactionsWrapper = ref<HTMLDivElement>(null);
 
-const transactionsOverview = ref<TransactionOverview[]>(null);
 const transactionsSearchTimeout = ref<NodeJS.Timeout>(null);
 const transactionsInitLoading = ref<boolean>(true);
 const transactionsInitAnimating = ref<boolean>(true);

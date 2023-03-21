@@ -106,11 +106,9 @@ interface USERSTYPE {
 onMounted(async () => {
   usersData = await getUsers()
   classesData = await getClasses()
-  console.log("usersData")
-  console.log(usersData)
 
   for (const obj of usersData) {
-    if (obj._id) {
+    if (obj._id && obj.role === 'student') {
       userDatas.value.user++
     }
   }

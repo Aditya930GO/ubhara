@@ -1,5 +1,5 @@
 <template>
-  <rd-panel class="rd-panel" :label="dataInmate ? 'Ubah Kelas' : 'Tambah Kelas'" :state="panelState"
+  <rd-panel class="rd-panel" :label="props.data ? 'Ubah Kelas' : 'Tambah Kelas'" :state="panelState"
     :loading="dataLoading" @exit="exit">
     <div class="rd-form-fieldset">
       <div class="rd-form-fieldset-input-wrapper">
@@ -34,8 +34,6 @@ import {
   InputOption,
   InputImageOption,
 } from "~~/interfaces/general.js";
-import { Inmate } from "~~/interfaces/inmates.js";
-import { InmateRequest } from "~~/interfaces/inmates";
 import { processSlotOutlet } from "@vue/compiler-core";
 
 // const { getInmates, addInmate, updateInmate, getInmateDetails } = useInmate();
@@ -49,7 +47,6 @@ const emits = defineEmits(["exit", "update"]);
 const config = useRuntimeConfig();
 
 const dataLoading = ref<boolean>(true);
-const dataInmate = ref<Inmate>(null);
 const submitLoading = ref<boolean>(false);
 var dateInmate = null;
 var birthdateInmate = null;

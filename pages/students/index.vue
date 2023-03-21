@@ -4,15 +4,18 @@
       <div class="rd-subpage">
         <div class="rd-subpage-header">
           <h1 class="rd-subpage-header-tittle rd-headline-2">Daftar Mahasiswa</h1>
-          <div class="rd-subpage-header-button">
+          <!-- <div class="rd-subpage-header-button">
             <rd-input-button v-if="viewMode === 'desktop'" class="rd-subpage-body-button" label="Tambah" icon="plus"
               type="primary" @clicked="emits('open-panel', { state: 'show', type: 'add-class-form' })" />
-          </div>
+          </div> -->
         </div>
         <div class="rd-subpage-body">
           <div ref="rdClassWrapper" class="rd-class-wrapper">
-            <rd-active-students v-for="(classRoom, i) in classes" :key="i" class="rd-class" :index="i" :data="classRoom"
-              @open-panel="emits('open-panel', { state: 'show', type: 'add-class-form', data: classRoom })" />
+            <rd-active-students v-for="(user, i) in users" :key="i" class="rd-class" :index="i" :data="user" @open-panel="emits('open-panel', {
+              state: 'hide',
+              type: 'user-form',
+            }),
+              emits('open-panel', { state: 'show', type: 'user-form', data: user })" />
           </div>
         </div>
       </div>
@@ -24,15 +27,6 @@
 <script lang="ts" setup>
 import gsap from "gsap";
 import { ComputedRef } from "vue";
-import {
-  InputGeneric,
-  InputOption,
-  InputSearchOption,
-} from "~~/interfaces/general";
-import {
-  TransactionOverview,
-  TransactionQuery,
-} from "~~/interfaces/transaction";
 
 definePageMeta({
   middleware: ["auth"],
@@ -40,6 +34,7 @@ definePageMeta({
 
 const { user } = useUser();
 const { classes, getClasses } = useClass();
+const { users, getUsers } = useUser();
 const route = useRoute();
 const emits = defineEmits(["logout", "open-panel"]);
 const { viewMode } = useMain();
@@ -50,11 +45,6 @@ const rdTransactionsOverviewContainer = ref<HTMLDivElement>(null);
 const rdTransactionsFilterDropdown = ref<HTMLDivElement>(null);
 const rdTransactionsFilterContainer = ref<HTMLDivElement>(null);
 const rdTransactionsWrapper = ref<HTMLDivElement>(null);
-
-const transactionsOverview = ref<TransactionOverview[]>(null);
-const transactionsSearchTimeout = ref<NodeJS.Timeout>(null);
-const transactionsInitLoading = ref<boolean>(true);
-const transactionsInitAnimating = ref<boolean>(true);
 
 const animate = {
   init(
@@ -133,23 +123,12 @@ function loadTransactions(text?: string): void {
   }, 250);
 }
 
-// watch(
-//   () => search.value,
-//   (val) => {
-//     clearTimeout(transactionsSearchTimeout.value);
-//     transactionsSearchTimeout.value = setTimeout(() => {
-//       loadTransactions(val || "");
-//       loadInmates(val || "");
-//     }, 500);
-//   }
-// );
-
 onMounted(() => {
   setTimeout(async () => {
     console.log(user.value.role)
     if (user.value.role !== "admin") router.push("/login");
     // transactionsOverview.value = await getTransactionOverview();
-    getClasses();
+    getUsers();
     animate.init(
       rdPageHeader.value,
       rdTransactionsFilterContainer.value,
