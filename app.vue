@@ -26,7 +26,7 @@
           <div class="rd-profile-actions">
             <button class="rd-profile-action" @focusout="dropDownCloser()" @click="
               dropDownState ? (dropDownState = false) : (dropDownState = true)
-            " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
+              " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
               <rd-svg :name="'chevron-down'" :color="dropDownOpened ? 'white' : 'primary'"
                 :style="dropDownState ? 'transform: rotate(180deg)' : ''" />
             </button>
@@ -74,7 +74,7 @@
           <div class="rd-profile-actions">
             <button class="rd-profile-action" @focusout="dropDownCloser()" @click="
               dropDownState ? (dropDownState = false) : (dropDownState = true)
-            " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
+              " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
               <rd-svg :name="'chevron-down'" :color="dropDownOpened ? 'white' : 'primary'"
                 :style="dropDownState ? 'transform: rotate(180deg)' : ''" />
             </button>
@@ -147,7 +147,6 @@ type PanelType =
 
 const emits = defineEmits(["logout", "open-panel", "open-panel-user"]);
 const { user, refresh, logout } = useUser();
-const { exportClasses } = useClass();
 const { viewMode } = useMain();
 const route = useRoute();
 
@@ -739,7 +738,7 @@ onMounted(async () => {
         user-select: none;
         cursor: pointer;
         padding-left: 2rem;
-        width: 40%;
+        width: 80%;
         height: 100%;
         display: flex;
         flex-direction: row;

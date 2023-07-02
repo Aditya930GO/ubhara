@@ -16,10 +16,9 @@
       </div>
     </div>
     <!-- <div class="rd-input-button-container"> -->
-    <rd-input-button class="rd-form-button" style="margin: 0 2rem" :loading="submitLoading" :disabled="
-      !nameInput.model
+    <rd-input-button class="rd-form-button" style="margin: 0 2rem" :loading="submitLoading" :disabled="!nameInput.model
 
-    " :label="'Submit'" @clicked="submit()" />
+      " :label="'Submit'" @clicked="submit()" />
     <!-- </div> -->
   </rd-panel>
 </template>
@@ -38,6 +37,7 @@ import { processSlotOutlet } from "@vue/compiler-core";
 
 // const { getInmates, addInmate, updateInmate, getInmateDetails } = useInmate();
 const { getClasses, addClass, updateClass, getClassDetails } = useClass();
+const { addAttendance } = useAttendance();
 
 const props = defineProps<{
   state: "idle" | "hide";
@@ -307,7 +307,7 @@ async function submit(): Promise<void> {
     notes: notes.value ? notes.value : "-",
 
   };
-  let addID: string = "";
+  let addId: string = "";
   if (props.data) {
     var newTags = tags.value.replaceAll(', ', ',')
     const payload = {
@@ -319,16 +319,23 @@ async function submit(): Promise<void> {
     };
 
 
-    addID = await updateClass(payload, true);
+    addId = await updateClass(payload, true);
   } else {
-    addID = await addClass(payload);
+    addId = await addClass(payload);
+  }
+  // console.log(addId);
+  if (addId) {
+    const payload = {
+      class_id: addId,
+      add_attendance: false
+    }
+    await addAttendance(payload)
+    console.log(addId);
+    panelState.value = "hide";
+  } else {
+    console.log(addId)
   }
   getClasses();
-  // console.log(addID);
-  if (addID) {
-    console.log(addID);
-    panelState.value = "hide";
-  }
 }
 function dateHandler(x: Date, y): string {
   const datse = new Date(x);

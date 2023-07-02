@@ -123,15 +123,6 @@ onMounted(() => {
     // console.log(user.value.role)
     await getClasses();
     console.log(classes.value)
-    // console.log(classes)
-    // if (user.value.role === "admin") await getClasses();
-    // if (user.value.role !== "admin") router.push("/login");
-    // transactionsOverview.value = await getTransactionOverview();
-    // animate.init(
-    //   rdPageHeader.value,
-    //   rdTransactionsFilterContainer.value,
-    //   rdTransactionsOverviewContainer.value
-    // );
   }, 250);
 });
 </script>

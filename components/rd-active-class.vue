@@ -1,6 +1,5 @@
 <template>
-  <div v-if="(user.role === 'student' && user.class_id === props.data._id) || user.role === 'admin'" class="rd-component"
-    ref="rdComponent">
+  <div class="rd-component" ref="rdComponent">
     <!-- <div class="rd-component" ref="rdComponent"> -->
     <div class="rd-class-header">
       <div class="rd-class-name-container" :class="user.role === 'student' ? 'student' : ''" @click="pindah()">
@@ -15,13 +14,13 @@
       <div v-if="(user.role === 'student' && !user.class_id) || user.role === 'admin'"
         class="rd-class-header-button-container">
         <button class="rd-class-action" @focusout="dropDownCloser()" @click="dropDownState ? (dropDownState = false) : (dropDownState = true)
-        " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
+          " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
           <rd-svg name="dots-horizontal" color="secondary" />
         </button>
       </div>
       <div v-if="dropDownState" class="actions-container" @focusout="dropDownCloser()">
         <div v-if="user.role === 'student' && !user.class_id" ripple class="action"
-          @click="dropDownState = false, submitEnrollClass()">
+          @mousedown="dropDownState = false, submitEnrollClass()">
           <div class="rd-icon-container">
             <rd-svg class="icon" :name="'open-in-app'" :color="dropDownState ? 'primary' : 'primary'" />
           </div>
@@ -93,12 +92,6 @@
 <script lang="ts" setup>
 import gsap from "gsap";
 import { ref, onMounted } from "vue";
-import { saveAs } from 'file-saver';
-import fileSaver from 'file-saver';
-
-// import fileSaver from 'file-saver'
-// import { read, utils, writeFileXLSX } from 'xlsx';
-// import * as XLSX from './xlsx.mjs';
 
 
 
@@ -107,7 +100,6 @@ const dropDownOpened = ref<boolean>(false);
 
 
 const { attendances, openClassAttendance, submitAttendance, getAttendances } = useAttendance();
-const { exportClasses } = useClass();
 const { user, users, enrollClass, getUsers } = useUser();
 const router = useRouter();
 
@@ -185,42 +177,12 @@ function test(): void {
 }
 
 async function exportAsExcel() {
-  // const result = await exportClasses(props.data._id)
   const { $fetch } = useNuxtApp()
   const urlString: string = `${config.public.apiBase}/attendances/excel/${props.data._id}`
   const response = await $fetch(urlString, 'get')
-  // const { data } = await useAsyncData('count', () => $fetch(urlString, 'get'))
-  // const result: [] = await data
-  // console.log(result)
-  // console.log(data.value.toLocaleString())
-  // const {data} = await exportClasses(props.data._id)
-  // var file = new File([data], "hello world.txt", { type: "text/plain;charset=utf-8" });
-  // const fileSaver = require('file-saver');
-  // var file = new File(raesponse, "hello world.xls");
-  // var blob = new Blob(response.text());
-  fileSaver(response, "hello world.xls");
-  // FileSaver.saveAs(blob, "hello world.xls");
+  console.log(response.value)
+  window.location.href = `${config.public.apiBase}/attendances/excel/${props.data._id}`
 }
-// // const fileSaver = require('file-saver');
-// const aduh = await exportClasses(props.data._id)
-// let filename = "absensi"
-// // fileSaver(aduh, `${filename}.xlsx`);
-// // var FileSaver = require('file-saver');
-// var blob = new Blob([aduh], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-// fileSaver.saveAs(blob, `${filename}.xlsx`);
-// this.loadingExport = true;
-// const fileSaver = require("file-saver");
-//   const { data } = await this.$axios({
-//     url: `${this.$config.apiURL}/attendances/excel/${props.data._id}`,
-//     method: "GET",
-//     responseType: "blob",
-//   });
-//   let filename = "absensi";
-
-//   fileSaver(data, `${filename}.xlsx`);
-//   // this.loadingExport = false;
-//   // this.simple = false;
-// }
 onMounted(() => {
   setTimeout(async () => {
 
