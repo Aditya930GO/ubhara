@@ -53,8 +53,8 @@
       <header class="rd-body-header" v-if="user && route.path !== '/login' && viewMode === 'mobile'"
         style="padding-right: 0.5rem;width: 100%;">
         <div class="rd-body-header-left" @click="home" style="padding-left: 0.5rem;width: 60%;">
-          <div class="rd-body-header-logo-container">
-            <img class="logo" :src="'./logo.png'" style="height: 2rem;" />
+          <div class="rd-body-header-logo-container" style="margin-right:0.1rem">
+            <img class="logo" :src="'./logo.png'" style="height: 2rem;margin-right:0.1rem" />
           </div>
 
           <div class="rd-body-header-details">

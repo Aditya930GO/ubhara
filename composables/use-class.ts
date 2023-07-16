@@ -72,6 +72,7 @@ export default () => {
       const response: Response = await $fetch(urlString, "get");
       if (response.status !== 200) throw new Error("");
       const result: [] = await response.json();
+      classes.value = result;
       return (classes.value = result);
     } catch (e) {
       return null;

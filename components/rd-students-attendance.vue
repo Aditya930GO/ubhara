@@ -50,7 +50,7 @@ const dropDownState = ref<boolean>(false);
 const dropDownOpened = ref<boolean>(false);
 
 const { attendances, getAttendances } = useAttendance();
-const { user, users, enrollClass, getUsers } = useUser();
+const { students, user, users, enrollClass, getUsers } = useUser();
 const router = useRouter();
 
 const emits = defineEmits(["logout", "open-panel"]);
@@ -97,7 +97,7 @@ onMounted(() => {
       // console.log(userDatas.value.attendances)
     }
     await getUsers()
-    usersData = users.value
+    usersData = students.value
     for (const obj of usersData) {
       if (obj._id && obj.classId === props.data._id) userDatas.value.user++;
     }

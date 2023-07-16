@@ -84,7 +84,7 @@
 
 <script lang="ts" setup>
 
-const { getUsers } = useUser();
+const { user, getUsers } = useUser();
 const { getClasses } = useClass();
 const rdComponent = ref<HTMLElement>(null);
 let number = 5

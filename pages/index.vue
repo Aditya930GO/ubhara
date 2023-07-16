@@ -11,12 +11,18 @@
           </div>
         </div>
         <div class="rd-subpage-body" :style="viewMode === 'mobile' ? 'width: 100%; padding: 0.5rem;' : ''">
-          <div ref="rdClassWrapper" class="rd-class-wrapper"
-            :style="viewMode === 'mobile' ? 'width: 100%; padding: 0.5rem;' : ''">
+          <div v-if="(user.role === 'student' && !user.class_id) || user.role === 'admin'" ref="rdClassWrapper"
+            class="rd-class-wrapper" :style="viewMode === 'mobile' ? 'width: 100%; padding: 0.5rem;' : ''">
             <rd-active-class v-for="(classRoom, i) in classes" :key="i" class="rd-class" :index="i" :data="classRoom"
               @open-panel="emits('open-panel', { state: 'show', type: 'add-class-form', data: classRoom })"
               :style="viewMode === 'mobile' ? 'width: 80%; padding: 0.15rem;' : ''" />
           </div>
+          <!-- <div v-else ref="rdClassWrapper" class="rd-class-wrapper"
+            :style="viewMode === 'mobile' ? 'width: 100%; padding: 0.5rem;' : ''">
+            <rd-active-class v-for="(classRoom, i) in classes" :key="i" class="rd-class" :index="i" :data="classRoom"
+              @open-panel="emits('open-panel', { state: 'show', type: 'add-class-form', data: classRoom })"
+              :style="viewMode === 'mobile' ? 'width: 80%; padding: 0.15rem;' : ''" />
+          </div> -->
         </div>
       </div>
 
@@ -109,21 +115,10 @@ const animate = {
   },
 };
 
-function loadTransactions(text?: string): void {
-  // transactionsLoading.value = true;
-  setTimeout(async () => {
-    // await getTransactions(text);
-    // transactionsLoading.value = false;
-  }, 250);
-}
 
-
-onMounted(() => {
-  setTimeout(async () => {
-    // console.log(user.value.role)
-    await getClasses();
-    console.log(classes.value)
-  }, 250);
+onMounted(async () => {
+  await getClasses();
+  console.log(classes.value._id)
 });
 </script>
 

@@ -38,15 +38,21 @@ export default () => {
       return null;
     }
   };
-  const signup = async (email: string, password: string, nim: string, uname: string, name: string ): Promise<string> => {
+  const signup = async (
+    email: string,
+    password: string,
+    nim: string,
+    uname: string,
+    name: string
+  ): Promise<string> => {
     try {
       const response: Response = await $fetch(
         `${config.public.apiBase}/users`,
         "post",
-        JSON.stringify({ email, password, nim, username:uname, name})
+        JSON.stringify({ email, password, nim, username: uname, name })
       );
       const results: string = await response.text();
-      console.log(results)
+      console.log(results);
       return results;
     } catch {
       return null;
@@ -60,8 +66,8 @@ export default () => {
         JSON.stringify({ class_id })
       );
       const results: string = await response.text();
-      console.log("results enroll")
-      console.log(results)
+      console.log("results enroll");
+      console.log(results);
       return results;
     } catch {
       return null;
@@ -77,24 +83,27 @@ export default () => {
 
       const result: User[] = await response.json();
       users.value = result;
+      // console.log(result);
       usersData = result;
-            return result;
+      return result;
     } catch (e) {
       return null;
     }
   };
-  const getStudent = async (): Promise<User[]> => {
+  const getStudent = async (payload): Promise<User[]> => {
     try {
       const response: Response = await $fetch(
-        `${config.public.apiBase}/users`,
+        `${config.public.apiBase}/users/${payload}`,
         "get"
       );
       if (response.status !== 200) throw new Error("");
 
       const result: User[] = await response.json();
-      students.value = result.filter(student => student.role === 'student');
-      console.log(students.value)
-      // usersData = result;
+      console.log("result get by class");
+      console.log(result);
+      users.value = result;
+      students.value = result;
+      usersData = result;
       return result;
     } catch (e) {
       return null;
@@ -178,5 +187,18 @@ export default () => {
     user.value = null;
   };
 
-  return { students, user, users,usersData, getStudent, updateUser,  login, logout, refresh, signup, enrollClass, getUsers };
+  return {
+    students,
+    user,
+    users,
+    usersData,
+    getStudent,
+    updateUser,
+    login,
+    logout,
+    refresh,
+    signup,
+    enrollClass,
+    getUsers,
+  };
 };

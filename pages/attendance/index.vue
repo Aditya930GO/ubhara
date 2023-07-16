@@ -130,18 +130,20 @@ onMounted(() => {
   setTimeout(async () => {
     console.log(user.value.role)
     if (localStorage.getItem('class_id')) {
+      getStudent(localStorage.getItem('class_id'))
       classDatas.value.class_name = localStorage.getItem('class_name')
-      console.log(localStorage.getItem('class_id'))
+      // console.log(localStorage.getItem('class_id'))
     } else {
       console.log("gaada data")
     }
     if (user.value.role !== "admin") router.push("/login");
-    getStudent();
-    getUsers();
+    // getStudent();
+    // getUsers();
     emits('open-panel', {
       state: 'show',
       type: 'analytics',
     });
+    console.log(students.value)
     animate.init(
       rdPageHeader.value,
       rdTransactionsFilterContainer.value,

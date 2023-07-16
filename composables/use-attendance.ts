@@ -5,7 +5,7 @@ export default () => {
   const { $fetch } = useNuxtApp();
   const config = useRuntimeConfig();
 
-  const attendances = useState("classes", () => null);
+  // const attendances = useState("classes", () => null);
 
   const loading = useState<boolean>("products-loading", () => false);
   const query = useState("products-query", () => {
@@ -64,11 +64,11 @@ export default () => {
       const response: Response = await $fetch(urlString, "get");
       if (response.status !== 200) throw new Error("");
       const result: [] = await response.json();
-      console.log("result di use attendances");
-      console.log(payload);
-      console.log(result);
+      // console.log("result di use attendances");
+      // console.log(payload);
+      // console.log(result);
       // attendances.value = result
-      return (attendances.value = result);
+      return result;
     } catch (e) {
       return null;
     }
@@ -82,7 +82,7 @@ export default () => {
       );
       if (response.status !== 200) throw new Error("");
       const result = await response.json();
-      console.log(result);
+      // console.log(result);
       return result;
     } catch (e) {
       return null;
@@ -118,7 +118,7 @@ export default () => {
   };
 
   return {
-    attendances,
+    // attendances,
     loading,
     query,
     submitAttendance,

@@ -1,55 +1,68 @@
 <template>
   <div class="rd-component" ref="rdComponent">
-    <!-- <div class="rd-component" ref="rdComponent"> -->
     <div class="rd-class-header">
-      <div class="rd-class-name-container" :class="user.role === 'student' ? 'student' : ''" @click="pindah()">
-        <span class="rd-class-name rd-headline-3">{{ props.data.name }}</span>
-        <div class="rd-class-tags-container">
+      <div class="rd-class-header-top">
+        <div class="rd-class-name-container" :class="user.role === 'student' ? 'student' : ''" @click="pindah()">
+          <span class="rd-class-name rd-headline-3">{{ props.data.name }}</span>
+          <!-- <div class="rd-class-tags-container">
           <div v-for="(classRoomTags, i) in userDatas.tags" :key="i" class="rd-class-tags-box">
             <span class="rd-class-tags rd-subtitle-text">{{ classRoomTags }}
             </span>
           </div>
+        </div> -->
+        </div>
+        <div class="rd-class-header-buttons-container">
+          <div v-if="(user.role === 'student' && !user.class_id) || user.role === 'admin'"
+            class="rd-class-header-button-container">
+            <button class="rd-class-action" @focusout="dropDownCloser()" @mousedown="openAttendance()
+              " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
+              <rd-svg name="check" color="secondary" />
+            </button>
+          </div>
+          <div v-if="(user.role === 'student' && !user.class_id) || user.role === 'admin'"
+            class="rd-class-header-button-container">
+            <button class="rd-class-action" @focusout="dropDownCloser()" @mousedown="exportAsExcel()
+              " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
+              <rd-svg name="file-excel" color="secondary" />
+            </button>
+          </div>
+          <div v-if="(user.role === 'student' && !user.class_id) || user.role === 'admin'"
+            class="rd-class-header-button-container">
+            <button class="rd-class-action" @focusout="dropDownCloser()" @click="dropDownState ? (dropDownState = false) : (dropDownState = true)
+              " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
+              <rd-svg name="dots-horizontal" color="secondary" />
+            </button>
+          </div>
+        </div>
+        <div v-if="dropDownState" class="actions-container" @focusout="dropDownCloser()">
+          <div v-if="user.role === 'student' && !user.class_id" ripple class="action"
+            @mousedown="dropDownState = false, submitEnrollClass()">
+            <div class="rd-icon-container">
+              <rd-svg class="icon" :name="'open-in-app'" :color="dropDownState ? 'primary' : 'primary'" />
+            </div>
+            <span class="name">Enroll class</span>
+          </div>
+          <div v-if="user.role !== 'student'" ripple class="action"
+            @mousedown="emits('open-panel'), dropDownState = false">
+            <div class="rd-icon-container">
+              <rd-svg class="icon" :name="'edit-outline'" :color="dropDownState ? 'primary' : 'primary'" />
+            </div>
+            <span class="name">Ubah kelas</span>
+          </div>
+          <div v-if="user.role !== 'student'" ripple class="action"
+            @mousedown="emits('open-panel'), dropDownState = false">
+            <div class="rd-icon-container">
+              <rd-svg class="icon" :name="'close'" :color="dropDownState ? 'primary' : 'primary'"
+                :style="dropDownState ? 'transform: rotate(180deg)' : ''" />
+            </div>
+            <span class="name">Hapus kelas</span>
+          </div>
         </div>
       </div>
-      <div v-if="(user.role === 'student' && !user.class_id) || user.role === 'admin'"
-        class="rd-class-header-button-container">
-        <button class="rd-class-action" @focusout="dropDownCloser()" @click="dropDownState ? (dropDownState = false) : (dropDownState = true)
-          " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
-          <rd-svg name="dots-horizontal" color="secondary" />
-        </button>
-      </div>
-      <div v-if="dropDownState" class="actions-container" @focusout="dropDownCloser()">
-        <div v-if="user.role === 'student' && !user.class_id" ripple class="action"
-          @mousedown="dropDownState = false, submitEnrollClass()">
-          <div class="rd-icon-container">
-            <rd-svg class="icon" :name="'open-in-app'" :color="dropDownState ? 'primary' : 'primary'" />
-          </div>
-          <span class="name">Enroll class</span>
-        </div>
-        <div v-if="user.role !== 'student'" ripple class="action" @mousedown="openAttendance(), dropDownState = false">
-          <div class="rd-icon-container">
-            <rd-svg class="icon" :name="'check'" :color="dropDownState ? 'primary' : 'primary'" />
-          </div>
-          <span class="name">Buka absen</span>
-        </div>
-        <div v-if="user.role !== 'student'" ripple class="action" @mousedown="exportAsExcel(), dropDownState = false">
-          <div class="rd-icon-container">
-            <rd-svg class="icon" :name="'file'" :color="dropDownState ? 'primary' : 'primary'" />
-          </div>
-          <span class="name">Export Excel</span>
-        </div>
-        <div v-if="user.role !== 'student'" ripple class="action" @mousedown="emits('open-panel'), dropDownState = false">
-          <div class="rd-icon-container">
-            <rd-svg class="icon" :name="'edit-outline'" :color="dropDownState ? 'primary' : 'primary'" />
-          </div>
-          <span class="name">Ubah kelas</span>
-        </div>
-        <div v-if="user.role !== 'student'" ripple class="action" @mousedown="emits('open-panel'), dropDownState = false">
-          <div class="rd-icon-container">
-            <rd-svg class="icon" :name="'close'" :color="dropDownState ? 'primary' : 'primary'"
-              :style="dropDownState ? 'transform: rotate(180deg)' : ''" />
-          </div>
-          <span class="name">Hapus kelas</span>
+      <div class="rd-class-tags-container">
+        <div v-for="(classRoomTags, i) in userDatas.tags" :key="i" class="rd-class-tags-box">
+          <span class="rd-class-tags rd-subtitle-text">{{ classRoomTags }}
+          </span>
         </div>
       </div>
     </div>
@@ -76,11 +89,19 @@
           </div>
           <div class="rd-class-participant-right">
             <span class="rd-product-placeholder rd-headline-4">Peserta</span>
-            <span class="rd-product-value rd-headline-5">{{ userDatas.user }}</span>
+            <span class="rd-product-value rd-headline-5">{{ userDatas.userCount }}</span>
           </div>
         </div>
       </div>
-      <div class="rd-class-absent-button-container" style="justify-content: center; ">
+      <div v-if="user.role === 'admin'" class="rd-class-attendance-detail-container">
+        <div class="rd-class-attendance-bar-container">
+          <div v-for="(num, i) in userDatas.attendances" :key="i"
+            :style="num <= userDatas.attended ? 'background-color: var(--success-color);' : 'background-color: var(--error-color);' && num === 1 ? 'border-radius: 25% 0 0 25%;' : ''"
+            class="rd-class-attendance-bar"></div>
+        </div>
+      </div>
+      <div v-if="user.role === 'student' && user.class_id" class="rd-class-attendance-button-container"
+        style="justify-content: center; ">
         <rd-input-button v-if="user.role === 'student'" style="width: 100%;" class="rd-subpage-body-button"
           :label="userDatas.attend_status ? 'Sudah Absen' : 'Absen'" type="primary" :disabled="userDatas.attend_status"
           @clicked="submitAttend()" />
@@ -99,7 +120,7 @@ const dropDownState = ref<boolean>(false);
 const dropDownOpened = ref<boolean>(false);
 
 
-const { attendances, openClassAttendance, submitAttendance, getAttendances } = useAttendance();
+const { openClassAttendance, submitAttendance, getAttendanceDetails } = useAttendance();
 const { user, users, enrollClass, getUsers } = useUser();
 const router = useRouter();
 
@@ -111,22 +132,24 @@ const props = defineProps<{
 }>();
 
 const userDatas = ref<USERSTYPE>({
-  attendances: [],
+  attendances: 0,
+  attended: 0,
   attend_status: false,
   tags: {},
-  user: 0,
+  userCount: 0,
   class: ""
 });
 interface USERSTYPE {
-  attendances: string[];
   attend_status: boolean;
   tags: any;
-  user: number | any;
+  attended: number | any,
+  attendances: number | any;
+  userCount: number | any;
   class: string;
 }
 
 
-let usersData = [];
+// let usersData = [];
 
 const rdComponent = ref<HTMLElement>(null);
 
@@ -171,10 +194,7 @@ function dropDownCloser(): void {
     dropDownState.value = false;
   }, 150);
 }
-function test(): void {
-  console.log("hai")
-  emits('open-panel', { state: 'show', type: 'add-class-form' })
-}
+
 
 async function exportAsExcel() {
   const { $fetch } = useNuxtApp()
@@ -183,18 +203,28 @@ async function exportAsExcel() {
   console.log(response.value)
   window.location.href = `${config.public.apiBase}/attendances/excel/${props.data._id}`
 }
-onMounted(() => {
-  setTimeout(async () => {
+onMounted(async () => {
 
-    usersData = users.value
-    for (const obj of usersData) {
-      if (obj._id && obj.class_id === props.data._id) userDatas.value.user++;
+  const usersData = users.value
+  setTimeout(() => {
+    for (const obj of users.value) {
+      if (obj._id && obj.class_id === props.data._id) userDatas.value.userCount++;
     }
   }, 250);
+
   userDatas.value.tags = props.data.tags?.split(',')
+  for (const obj of await getAttendanceDetails(props.data._id)) {
+    userDatas.value.attendances++;
+    if (obj.opened === true) userDatas.value.attended++;
+  }
+  console.log(userDatas.value.attendances)
+  console.log(userDatas.value.attended)
   setTimeout(() => {
     animate.init(rdComponent.value);
   }, 50 * props.index);
+  // console.log(await getAttendanceDetails(props.data._id))
+  // console.log("attendances")
+  // console.log(userDatas.value.attendances)
 });
 </script>
 
@@ -213,162 +243,165 @@ onMounted(() => {
   .rd-class-header {
     position: relative;
     width: 100%;
-    height: 3rem;
+    height: 3.5rem;
+    // margin: 1rem;
     justify-content: space-between;
     box-sizing: border-box;
     display: flex;
+    flex-direction: column;
 
-    .rd-class-header-button-container {
-      border: 1px solid var(--primary-color);
+    .rd-class-header-top {
       position: relative;
-      height: 1.75rem;
-      width: 1.75rem;
-      border-radius: 25%;
-      overflow: hidden;
-      background: var(--background-depth-two-color);
+      width: 100%;
+      height: 2rem;
+      justify-content: flex-end;
+      box-sizing: border-box;
       display: flex;
-      flex-shrink: 0;
-      margin: 1rem;
 
-      >* {
-        cursor: pointer;
+      .rd-class-name-container {
+
         position: relative;
-        width: 1.75rem;
-        height: 1.75rem;
-        background: white;
-        border: none;
+        width: calc(100% - 6rem);
+        height: 100%;
+        box-sizing: border-box;
         display: flex;
-        flex-shrink: 0;
-        justify-content: center;
-        align-items: center;
+        flex-direction: column;
+        cursor: pointer;
+
+        &.student {
+          cursor: none;
+          pointer-events: none;
+        }
+
+        span.rd-class-name {
+          padding: 1rem;
+          position: relative;
+          display: flex;
+          flex-wrap: wrap;
+        }
       }
 
-      .rd-class-action {
-        padding: 0 0.2rem;
+      .rd-class-header-buttons-container {
+        position: relative;
+        width: 100%;
+        height: 1.75rem;
+        justify-content: flex-end;
         box-sizing: border-box;
-        transition: background-color 0.25s;
+        display: flex;
+        margin-top: 0.75rem;
 
-        &:hover {
+        .rd-class-header-button-container {
+          border: 1px solid var(--primary-color);
+          position: relative;
+          height: 1.75rem;
+          width: 1.75rem;
+          border-radius: 25%;
+          overflow: hidden;
+          background: var(--background-depth-two-color);
+          display: flex;
+          flex-shrink: 0;
+          margin-right: 0.5rem;
+
+          >* {
+            cursor: pointer;
+            position: relative;
+            width: 1.75rem;
+            height: 1.75rem;
+            background: white;
+            border: none;
+            display: flex;
+            flex-shrink: 0;
+            justify-content: center;
+            align-items: center;
+          }
+
+          .rd-class-action {
+            padding: 0 0.2rem;
+            box-sizing: border-box;
+            transition: background-color 0.25s;
+
+            &:hover {
+              background: rgba(0, 0, 0, 0.05);
+            }
+          }
+        }
+      }
+
+      .actions-container {
+        z-index: 9999999999;
+        position: absolute;
+        top: 100%;
+        right: 1rem;
+        border-radius: 0.75rem;
+        background: var(--background-depth-two-color);
+        border: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+
+        .action {
+          cursor: pointer;
+          position: relative;
+          width: 10rem;
+          height: 2rem;
+          flex-shrink: 0;
+          background: rgba(255, 255, 255, 0);
+          transition: 0.25s background-color;
+          padding: 0 0.5rem;
+          box-sizing: border-box;
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+
+          .rd-icon-container {
+            font-size: 1rem;
+            width: 1.25rem;
+          }
+
+          .name {
+            // font-family: "Quicksand";
+            font-size: 0.65rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+          }
+
+          &.error {
+            color: var(--error-color);
+
+            .icon {
+              color: inherit;
+            }
+
+            h3.name {
+              color: inherit;
+            }
+          }
+
+          &:hover {
+            background: rgba(230, 230, 230, 0.5);
+          }
+
+          &:first-child {
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
+          }
+
+          &:last-child {
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+          }
+        }
+
+        .divider {
+          position: relative;
+          width: calc(100% - 1rem);
+          height: 1px;
+          flex-shrink: 0;
+          margin: 0 0.5rem;
           background: rgba(0, 0, 0, 0.05);
         }
       }
-    }
-
-    .actions-container {
-      z-index: 1000000;
-      position: absolute;
-      top: 100%;
-      right: 1rem;
-      border-radius: 0.75rem;
-      background: var(--background-depth-two-color);
-      border: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: flex-start;
-
-      .action {
-        cursor: pointer;
-        position: relative;
-        width: 10rem;
-        height: 2rem;
-        flex-shrink: 0;
-        background: rgba(255, 255, 255, 0);
-        transition: 0.25s background-color;
-        padding: 0 0.5rem;
-        box-sizing: border-box;
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-
-        .rd-icon-container {
-          font-size: 1rem;
-          width: 1.25rem;
-        }
-
-        .name {
-          // font-family: "Quicksand";
-          font-size: 0.65rem;
-          font-weight: 600;
-          margin-left: 0.5rem;
-        }
-
-        &.error {
-          color: var(--error-color);
-
-          .icon {
-            color: inherit;
-          }
-
-          h3.name {
-            color: inherit;
-          }
-        }
-
-        &:hover {
-          background: rgba(230, 230, 230, 0.5);
-        }
-
-        &:first-child {
-          border-top-left-radius: 18px;
-          border-top-right-radius: 18px;
-        }
-
-        &:last-child {
-          border-bottom-left-radius: 18px;
-          border-bottom-right-radius: 18px;
-        }
-      }
-
-      .divider {
-        position: relative;
-        width: calc(100% - 1rem);
-        height: 1px;
-        flex-shrink: 0;
-        margin: 0 0.5rem;
-        background: rgba(0, 0, 0, 0.05);
-      }
-    }
-  }
-
-  .rd-class-image-container {
-    position: relative;
-    width: 4rem;
-    height: 4rem;
-    background: var(--background-depth-two-color);
-    border-radius: 0.75rem;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    img.rd-class-image {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
-
-  .rd-class-name-container {
-    position: relative;
-    width: calc(100% - 4rem);
-    height: 100%;
-    padding: 1rem;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    cursor: pointer;
-
-    &.student {
-      cursor: none;
-      pointer-events: none;
-    }
-
-    span.rd-class-name {
-      position: relative;
-      display: flex;
-      flex-wrap: wrap;
     }
 
     .rd-class-tags-container {
@@ -377,7 +410,7 @@ onMounted(() => {
       justify-content: flex-start;
       width: 100%;
       height: 1rem;
-      margin-top: 0.25rem;
+      margin: 0.75rem;
 
       .rd-class-tags-box {
         display: inline;
@@ -402,6 +435,7 @@ onMounted(() => {
       }
     }
   }
+
 }
 
 .rd-product-divider {
@@ -415,12 +449,37 @@ onMounted(() => {
 .rd-class-body {
   position: relative;
   width: 100%;
-  padding: 1rem;
+  padding: 0.75rem;
   box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
 
-  .rd-class-absent-button-container {
+  .rd-class-attendance-detail-container {
+    margin-top: 0.5rem;
+    flex-direction: row;
+    position: relative;
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+
+    .rd-class-attendance-bar-container {
+      position: relative;
+      display: flex;
+      height: 1rem;
+      width: 100%;
+      flex-direction: row;
+
+      .rd-class-attendance-bar {
+        width: calc(100% / 16);
+        height: 1rem;
+        position: relative;
+        display: flex;
+        background-color: var(--error-color);
+      }
+    }
+  }
+
+  .rd-class-attendance-button-container {
     margin-top: 0.5rem;
     flex-direction: row;
     position: relative;
@@ -435,8 +494,6 @@ onMounted(() => {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-
-
 
     .rd-class-schedule,
     .rd-class-participant {

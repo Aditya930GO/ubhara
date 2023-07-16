@@ -1,6 +1,5 @@
 // import { UserRoleAction } from "./user-role";
 
-
 export interface User {
   _id: string;
   name: string;
@@ -24,7 +23,7 @@ export interface UserOverview {
   _id: string;
   name: string;
   image_url: string;
-  role:string;
+  role: string;
   sale: {
     count: number;
     value: number;
