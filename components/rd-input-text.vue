@@ -1,11 +1,6 @@
 <template>
-  <div
-    ref="rdInputComponent"
-    class="rd-input-component"
-    :class="`${props.input.error ? 'rd-input-error-active' : ''} ${
-      props.input.disabled ? 'rd-input-disabled' : ''
-    }`"
-  >
+  <div ref="rdInputComponent" class="rd-input-component" :class="`${props.input.error ? 'rd-input-error-active' : ''} ${props.disabled ? 'rd-input-disabled' : ''
+    }`">
     <label v-if="props.input.label" class="rd-input-label rd-headline-6">{{
       props.input.label
     }}</label>
@@ -13,21 +8,12 @@
       <div v-if="props.input.icon" class="rd-input-icon-container">
         <rd-svg :name="props.input.icon" :color="'secondary'" />
       </div>
-      <input
-        class="rd-input rd-body-text"
-        :placeholder="props.input.placeholder"
-        :name="props.input.name"
-        :type="props.input.type === 'number' ? 'text' : props.input.type"
-        :disabled="props.input.disabled"
-        ref="rdInput"
-        @input="updateModel"
-      />
+      <input class="rd-input rd-body-text" :placeholder="props.input.placeholder" :name="props.input.name"
+        :type="props.input.type === 'number' ? 'text' : props.input.type" :disabled="props.input.disabled" ref="rdInput"
+        @input="updateModel" />
       <div class="rd-input-border"></div>
     </div>
-    <span
-      v-if="typeof props.input.error === 'string'"
-      class="rd-input-error rd-headline-6"
-    >
+    <span v-if="typeof props.input.error === 'string'" class="rd-input-error rd-headline-6">
       <span class="rd-text-wrapper">
         <span class="rd-text-container rd-text-container-up">
           <span class="rd-text">{{ inputError }}</span>
@@ -42,6 +28,7 @@ import { InputOption } from "~~/interfaces/general.js";
 
 const props = defineProps<{
   input: InputOption;
+  disabled?: boolean;
 }>();
 
 const rdInput = ref<HTMLInputElement>(null);
@@ -146,6 +133,7 @@ onMounted(() => {
   position: relative;
   display: flex;
   flex-direction: column;
+
   label.rd-input-label {
     position: relative;
     width: 100%;
@@ -155,6 +143,7 @@ onMounted(() => {
     // opacity: 0.5;
     align-items: center;
   }
+
   .rd-input-container {
     position: relative;
     width: 100%;
@@ -163,6 +152,7 @@ onMounted(() => {
     border-radius: 0.5rem;
     display: flex;
     align-items: center;
+
     .rd-input-icon-container {
       position: relative;
       width: 2rem;
@@ -175,10 +165,12 @@ onMounted(() => {
       display: flex;
       justify-content: center;
       align-items: center;
-      & + input.rd-input {
+
+      &+input.rd-input {
         width: calc(100% - 2rem);
       }
     }
+
     input.rd-input {
       position: relative;
       width: 100%;
@@ -192,29 +184,36 @@ onMounted(() => {
       background: rgba(0, 0, 0, 0);
       display: flex;
       transition: background-color 0.25s;
+
       &::placeholder {
         color: var(--font-color);
         // opacity: 0.5;
         transition: opacity 0.25s;
       }
+
       &:hover {
         outline: none;
         background: rgba(0, 0, 0, 0);
+
         &::placeholder {
           opacity: 1;
         }
       }
+
       &:focus {
         outline: none;
         background: var(--background-depth-two-color);
       }
-      &:focus + .rd-input-border {
+
+      &:focus+.rd-input-border {
         border-color: var(--primary-color);
+
         &::before {
           opacity: 0.25;
         }
       }
     }
+
     .rd-input-border {
       pointer-events: none;
       position: absolute;
@@ -226,6 +225,7 @@ onMounted(() => {
       border: 1px solid rgba(0, 0, 0, 0.125);
       box-sizing: border-box;
       transition: 0.25s border-color, 0.25s border-width;
+
       &::before {
         content: "";
         position: absolute;
@@ -241,6 +241,7 @@ onMounted(() => {
       }
     }
   }
+
   span.rd-input-error {
     position: relative;
     width: 100%;
@@ -248,20 +249,24 @@ onMounted(() => {
     display: flex;
     color: var(--error-color);
     align-items: center;
+
     span.rd-text-wrapper {
       span.rd-text-container {
         transition: 0.25s transform;
+
         span.rd-text {
           transition: 0.25s transform;
         }
       }
     }
   }
+
   &.rd-input-error-active {
     span.rd-input-error {
       span.rd-text-wrapper {
         span.rd-text-container {
           transform: translateY(0);
+
           span.rd-text {
             transform: translateY(0);
           }
@@ -269,10 +274,11 @@ onMounted(() => {
       }
     }
   }
+
   &.rd-input-disabled {
     pointer-events: none;
     filter: grayscale(0.75);
-    opacity: 0.5;
+    opacity: 1;
   }
 }
 </style>

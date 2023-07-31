@@ -28,9 +28,7 @@ export default () => {
         })
       );
       if (response.status !== 201) throw new Error("");
-
       const result: string = await response.text();
-      console.log(result);
       return result;
     } catch (e) {
       return null;
@@ -96,6 +94,7 @@ export default () => {
       );
       if (response.status !== 200) throw new Error("");
       const result = await response.json();
+      console.log("result");
       console.log(result);
       return result;
     } catch (e) {

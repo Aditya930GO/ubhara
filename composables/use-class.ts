@@ -73,7 +73,7 @@ export default () => {
       if (response.status !== 200) throw new Error("");
       const result: [] = await response.json();
       classes.value = result;
-      return (classes.value = result);
+      return result;
     } catch (e) {
       return null;
     }
@@ -93,50 +93,27 @@ export default () => {
       return null;
     }
   };
-  // const getProductsSkus = async (): Promise<ProductMin[]> => {
-  //   try {
-  //     const response: Response = await $fetch(`${config.public.apiBase}/products/skus`, 'get')
-  //     if (response.status !== 200) throw new Error('')
-
-  //     const result = await response.json()
-  //     skus.value = result
-
-  //     return result
-  //   } catch (e) {
-  //     return null
-  //   }
-  // }
-
-  // const addProductStock = async (payload: ProductStockRequest): Promise<string> => {
-  //   try {
-  //     const response: Response = await $fetch(`${config.public.apiBase}/product-stocks/${payload.product_id}`, 'post', JSON.stringify({
-  //       branch_id: payload.branch_id,
-  //       quantity: payload.quantity,
-  //       price: payload.price
-  //     }))
-  //     if (response.status !== 201) throw new Error('')
-
-  //     const result: string = await response.text()
-  //     return result
-  //   } catch (e) {
-  //     return null
-  //   }
-  // }
-
-  // const updateProductStock = async (payload: ProductStockRequest): Promise<string[]> => {
-  //   try {
-  //     const response: Response = await $fetch(`${config.public.apiBase}/product-stocks/${payload.product_id}`, 'put', JSON.stringify({
-  //       branch_id: payload.branch_id,
-  //       quantity: payload.quantity,
-  //     }))
-  //     if (response.status !== 200) throw new Error('')
-
-  //     const result: string[] = await response.json()
-  //     return result
-  //   } catch (e) {
-  //     return null
-  //   }
-  // }
+  const deleteClass = async (payload) => {
+    try {
+      const response: Response = await $fetch(
+        `${config.public.apiBase}/classes/delete/${payload._id}`,
+        "put",
+        JSON.stringify({
+          email: payload.email,
+          password: payload.password,
+        })
+      );
+      if (response.status !== 200) throw new Error("");
+      const result: string = await response.text();
+      console.log("result");
+      console.log(result);
+      return result;
+    } catch (e) {
+      console.log("error");
+      console.log(e);
+      return e;
+    }
+  };
 
   return {
     classes,
@@ -144,6 +121,7 @@ export default () => {
     query,
     addClass,
     updateClass,
+    deleteClass,
     getClasses,
     getClassDetails,
   };

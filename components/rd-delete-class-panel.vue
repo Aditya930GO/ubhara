@@ -1,24 +1,22 @@
 <template>
-  <rd-panel class="rd-panel" :label="props.data ? 'Ubah Kelas' : 'Tambah Kelas'" :state="panelState"
-    :loading="dataLoading" @exit="exit">
+  <rd-panel class="rd-panel" :label="'hapus kelas'" :state="panelState" :loading="dataLoading" @exit="exit">
     <div class="rd-form-fieldset">
       <div class="rd-form-fieldset-input-wrapper">
-        <rd-input-text class="rd-fieldset-input" :input="nameInput" />
+        <rd-input-text class="rd-fieldset-input" :input="nameInput" :disabled="true" />
       </div>
       <div class="rd-form-fieldset-input-wrapper">
-        <rd-input-text class="rd-fieldset-input" :input="scheduleInput" />
+        <rd-input-text class="rd-fieldset-input" :input="scheduleInput" :disabled="true" />
       </div>
       <div class="rd-form-fieldset-input-wrapper">
-        <rd-input-text class="rd-fieldset-input" :input="tagsInput" />
+        <rd-input-text class="rd-fieldset-input" :input="emailInput" />
       </div>
       <div class="rd-form-fieldset-input-wrapper">
-        <rd-input-text class="rd-fieldset-input" :input="notesInput" />
+        <rd-input-text class="rd-fieldset-input" :input="passInput" />
       </div>
     </div>
     <!-- <div class="rd-input-button-container"> -->
-    <rd-input-button class="rd-form-button" style="margin: 0 2rem" :loading="submitLoading" :disabled="!nameInput.model
-
-      " :label="'Submit'" @clicked="submit()" />
+    <rd-input-button class="rd-form-button" style="margin: 0 2rem" :loading="submitLoading" :disabled="!passInput.model && !emailInput.model
+      " :label="'Submit'" @mousedown="submit()" />
     <!-- </div> -->
   </rd-panel>
 </template>
@@ -36,14 +34,13 @@ import {
 import { processSlotOutlet } from "@vue/compiler-core";
 
 // const { getInmates, addInmate, updateInmate, getInmateDetails } = useInmate();
-const { getClasses, addClass, updateClass, getClassDetails } = useClass();
-const { addAttendance } = useAttendance();
+const { getClasses, deleteClass } = useClass();
 
 const props = defineProps<{
   state: "idle" | "hide";
   data?;
 }>();
-const emits = defineEmits(["exit", "update", "reload"]);
+const emits = defineEmits(["exit", "update"]);
 const config = useRuntimeConfig();
 
 const dataLoading = ref<boolean>(true);
@@ -53,28 +50,6 @@ var birthdateInmate = null;
 var dataImageUrl = null;
 const panelState = ref<"idle" | "hide">("idle");
 
-const category: string[] = ["Kategori I", "Kategori II", "Kategori III"];
-const sexs: string[] = ["pria", "wanita"];
-const months: string[] = [
-  "Januari",
-  "Februari",
-  "Maret",
-  "April",
-  "Mei",
-  "Juni",
-  "Juli",
-  "Agustus",
-  "September",
-  "Oktober",
-  "November",
-  "Desember",
-];
-
-const fileInput = ref<InputImageOption>({
-  label: "Upload images",
-  limit: 3,
-  file: [],
-});
 
 
 const nameInput = ref<InputOption>({
@@ -109,11 +84,26 @@ const notesInput = ref<InputOption>({
   value: "",
   error: "",
 });
+const emailInput = ref<InputOption>({
+  name: "email",
+  label: "Email",
+  placeholder: "abc@def.com",
+  model: "",
+  value: "",
+  error: "",
+});
+const passInput = ref<InputOption>({
+  name: "Password",
+  label: "Password",
+  placeholder: "...",
+  type: "password",
+  model: "",
+  value: "",
+  error: "",
+});
 
-const name: ComputedRef<string> = computed((): string => nameInput.value.model);
-const schedule: ComputedRef<string> = computed((): string => scheduleInput.value.model);
-const notes: ComputedRef<string> = computed((): string => notesInput.value.model);
-const tags: ComputedRef<string> = computed((): string => tagsInput.value.model);
+const email: ComputedRef<string> = computed((): string => emailInput.value.model);
+const password: ComputedRef<string> = computed((): string => passInput.value.model);
 
 
 const animate = {
@@ -297,70 +287,29 @@ function exit(): void {
   emits("exit");
 }
 
-async function submit(): Promise<void> {
+async function submit() {
   submitLoading.value = true;
-
   const payload = {
-    name: name.value,
-    schedule: schedule.value,
-    tags: tags.value,
-    notes: notes.value ? notes.value : "-",
-
+    _id: props.data._id,
+    email: email.value,
+    password: password.value
   };
-  let addId: string = "";
-  if (props.data) {
-    var newTags = tags.value.replaceAll(', ', ',')
-    const payload = {
-      _id: props.data._id,
-      name: name.value,
-      schedule: schedule.value,
-      tags: newTags,
-      notes: notes.value ? notes.value : "-",
-    };
-
-
-    addId = await updateClass(payload, true);
-  } else {
-    addId = await addClass(payload);
-  }
-  // console.log(addId);
-  if (addId) {
-    const payload = {
-      class_id: addId,
-      add_attendance: false
-    }
-    await addAttendance(payload)
-    console.log(addId);
+  console.log(payload)
+  const result = await deleteClass(payload)
+  console.log(result)
+  if (result === "SUCCESS") {
     panelState.value = "hide";
+    location.reload();
   } else {
-    console.log(addId)
+    passInput.value.error = 'Harap masukkan password dan email dengan benar'
+    setTimeout(() => {
+      submitLoading.value = false;
+    }, 500);
   }
-  location.reload();
-}
-function dateHandler(x: Date, y): string {
-  const datse = new Date(x);
-  const year: number = datse.getFullYear();
-  const month: number = datse.getMonth();
-  const date: number = datse.getDate();
-  const hours: number = datse.getHours();
-  const minutes: number = datse.getMinutes();
-
-  if (y === "year") return `${year}`;
-  if (y === "months") return `${months[month]}`;
-  if (y === "month") return `${month}`;
-  if (y === "date") return ` ${date}`;
-
-  return;
+  // getClasses();
 }
 
-// watch(
-//   () => yearInsideInput.value.model,
-//   (val: string) => {
-//     if (val.length < 4 || !val)
-//       yearInsideInput.value.error = "This field is required";
-//     else yearInsideInput.value.error = " ";
-//   }
-// );
+
 onMounted(async () => {
   if (props.data) {
     // const data = await getClassDetails(props.data);

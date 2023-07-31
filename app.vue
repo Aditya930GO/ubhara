@@ -103,6 +103,8 @@
       </main>
       <rd-add-class-panel v-if="panelOpened === 'add-class-form'" :state="panelState" :data="panelData[0]"
         @exit="panelHandler({ state: 'hide' })" />
+      <rd-delete-class-panel v-if="panelOpened === 'delete-class-form'" :state="panelState" :data="panelData[0]"
+        @exit="panelHandler({ state: 'hide' })" />
       <rd-user-form-panel v-if="panelOpened === 'user-form'" :state="panelState" :data="panelData[0]"
         @exit="panelHandler({ state: 'hide' })" />
       <rd-analytics v-if="user && route.path !== '/login' && panelOpened !== 'analytics' && viewMode === 'desktop'"
@@ -143,7 +145,8 @@ type PanelType =
   | "login-form"
   | "user-form"
   | "employee-role-form"
-  | "add-class-form";
+  | "add-class-form"
+  | "delete-class-form";
 
 const emits = defineEmits(["logout", "open-panel", "open-panel-user"]);
 const { user, refresh, logout } = useUser();

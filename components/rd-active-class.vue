@@ -1,22 +1,17 @@
 <template>
-  <div class="rd-component" ref="rdComponent">
+  <div v-if="(user.role === 'student' && !user.class_id) || (user.class_id === props.data._id) || user.role === 'admin'"
+    class="rd-component" ref="rdComponent">
     <div class="rd-class-header">
       <div class="rd-class-header-top">
-        <div class="rd-class-name-container" :class="user.role === 'student' ? 'student' : ''" @click="pindah()">
+        <div class="rd-class-name-container" @click="pindah()">
           <span class="rd-class-name rd-headline-3">{{ props.data.name }}</span>
-          <!-- <div class="rd-class-tags-container">
-          <div v-for="(classRoomTags, i) in userDatas.tags" :key="i" class="rd-class-tags-box">
-            <span class="rd-class-tags rd-subtitle-text">{{ classRoomTags }}
-            </span>
-          </div>
-        </div> -->
         </div>
         <div class="rd-class-header-buttons-container">
-          <div v-if="(user.role === 'student' && !user.class_id) || user.role === 'admin'"
-            class="rd-class-header-button-container">
+          <div v-if="user.role === 'admin'" class="rd-class-header-button-container">
             <button class="rd-class-action" @focusout="dropDownCloser()" @mousedown="openAttendance()
               " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
-              <rd-svg name="check" color="secondary" />
+              <rd-svg v-if="userDatas.attended >= userDatas.attendances" name="plus" color="secondary" />
+              <rd-svg v-else name="check" color="secondary" />
             </button>
           </div>
           <div v-if="(user.role === 'student' && !user.class_id) || user.role === 'admin'"
@@ -50,7 +45,7 @@
             <span class="name">Ubah kelas</span>
           </div>
           <div v-if="user.role !== 'student'" ripple class="action"
-            @mousedown="emits('open-panel'), dropDownState = false">
+            @mousedown="emits('delete-panel'), dropDownState = false">
             <div class="rd-icon-container">
               <rd-svg class="icon" :name="'close'" :color="dropDownState ? 'primary' : 'primary'"
                 :style="dropDownState ? 'transform: rotate(180deg)' : ''" />
@@ -94,17 +89,32 @@
         </div>
       </div>
       <div v-if="user.role === 'admin'" class="rd-class-attendance-detail-container">
+        <div class="rd-class-attendance-date rd-headline-3">
+          {{ `Absen Terakhir : ${userDatas.date ? formatDate(userDatas.date) : ' - '}` }}
+        </div>
         <div class="rd-class-attendance-bar-container">
           <div v-for="(num, i) in userDatas.attendances" :key="i"
-            :style="num <= userDatas.attended ? 'background-color: var(--success-color);' : 'background-color: var(--error-color);' && num === 1 ? 'border-radius: 25% 0 0 25%;' : ''"
-            class="rd-class-attendance-bar"></div>
+            :style="num === 1 ? 'border-radius: 25% 0 0 25%;' : num >= userDatas.attendances ? 'border-radius: 0 25% 25% 0;' : ''"
+            class="rd-class-attendance-bar" :class="num <= userDatas.attended ? 'opened' : ''"></div>
+        </div>
+      </div>
+      <div v-if="user.role === 'student'" class="rd-class-attendance-detail-container">
+        <div class="rd-class-attendance-date rd-headline-3">
+          {{ `Absen Terakhir : ${userDatas.date ? formatDate(userDatas.date) : ' - '}` }}
+        </div>
+        <div class="rd-class-attendance-bar-container">
+          <div v-for="(num, i) in userDatas.attendance" :key="i"
+            :style="num === 1 ? 'border-radius: 25% 0 0 25%;' : num >= userDatas.attendances.length ? 'border-radius: 0 25% 25% 0;' : ''"
+            class="rd-class-attendance-bar"
+            :class="Object.values(num.attend).indexOf(user._id) > -1 ? 'opened' : num.opened ? 'absent' : ''">
+          </div>
         </div>
       </div>
       <div v-if="user.role === 'student' && user.class_id" class="rd-class-attendance-button-container"
         style="justify-content: center; ">
         <rd-input-button v-if="user.role === 'student'" style="width: 100%;" class="rd-subpage-body-button"
-          :label="userDatas.attend_status ? 'Sudah Absen' : 'Absen'" type="primary" :disabled="userDatas.attend_status"
-          @clicked="submitAttend()" />
+          :label="userDatas.attend_status ? 'Sudah Absen' : userDatas.time ? 'Absen' : 'Absensi di tutup'" type="primary"
+          :disabled="userDatas.attend_status || !userDatas.time" @clicked="submitAttend()" />
       </div>
     </div>
   </div>
@@ -114,17 +124,15 @@
 import gsap from "gsap";
 import { ref, onMounted } from "vue";
 
-
-
 const dropDownState = ref<boolean>(false);
 const dropDownOpened = ref<boolean>(false);
 
-
+const { classes, deleteClass } = useClass();
 const { openClassAttendance, submitAttendance, getAttendanceDetails } = useAttendance();
 const { user, users, enrollClass, getUsers } = useUser();
 const router = useRouter();
 
-const emits = defineEmits(["logout", "open-panel", "navigate"]);
+const emits = defineEmits(["logout", "open-panel", "delete-panel", "navigate"]);
 const config = useRuntimeConfig();
 const props = defineProps<{
   index: number;
@@ -132,21 +140,41 @@ const props = defineProps<{
 }>();
 
 const userDatas = ref<USERSTYPE>({
+  attendance: [],
   attendances: 0,
   attended: 0,
   attend_status: false,
   tags: {},
   userCount: 0,
-  class: ""
+  class: "",
+  date: "",
+  time: false,
 });
 interface USERSTYPE {
+  attendance: any;
   attend_status: boolean;
   tags: any;
   attended: number | any,
   attendances: number | any;
   userCount: number | any;
   class: string;
+  date: string;
+  time: boolean;
 }
+const months = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
 
 
 // let usersData = [];
@@ -182,7 +210,23 @@ function pindah(): void {
 async function openAttendance() {
   console.log(props.data._id)
   openClassAttendance(props.data._id.toLocaleString())
+  location.reload();
+  userDatas.value.attendance = await getAttendanceDetails(props.data._id)
 }
+function formatDate(str: string): string {
+  const date = new Date(str);
+  return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+}
+function timeCheck(str: string) {
+  const date: number = new Date(str).getDate()
+  const today = new Date().getDate()
+  if (date === today) {
+    return true
+  } else {
+    false
+  }
+}
+
 async function submitAttend() {
   console.log(props.data._id)
   const result = await submitAttendance(props.data._id.toLocaleString())
@@ -197,34 +241,34 @@ function dropDownCloser(): void {
 
 
 async function exportAsExcel() {
-  const { $fetch } = useNuxtApp()
-  const urlString: string = `${config.public.apiBase}/attendances/excel/${props.data._id}`
-  const response = await $fetch(urlString, 'get')
-  console.log(response.value)
   window.location.href = `${config.public.apiBase}/attendances/excel/${props.data._id}`
 }
-onMounted(async () => {
 
-  const usersData = users.value
+onMounted(async () => {
+  userDatas.value.attendance = await getAttendanceDetails(props.data._id)
+  console.log(props.data)
   setTimeout(() => {
+    // console.log(userDatas.value.attendance)
+    userDatas.value.tags = props.data.tags?.split(',')
     for (const obj of users.value) {
       if (obj._id && obj.class_id === props.data._id) userDatas.value.userCount++;
     }
-  }, 250);
-
-  userDatas.value.tags = props.data.tags?.split(',')
-  for (const obj of await getAttendanceDetails(props.data._id)) {
-    userDatas.value.attendances++;
-    if (obj.opened === true) userDatas.value.attended++;
-  }
-  console.log(userDatas.value.attendances)
-  console.log(userDatas.value.attended)
+    for (const obj of userDatas.value.attendance) {
+      userDatas.value.attendances++;
+      if (obj.opened === true && obj.opened !== null) userDatas.value.attended++;
+      // console.log(Object.values(obj.attend).indexOf(user.value._id))
+    }
+    const attended = userDatas.value.attendance[userDatas.value.attended - 1]
+    console.log(attended)
+    if (userDatas.value.attendance.length > 0 && userDatas.value.attended > 0) userDatas.value.date = attended.date
+    if (Object.values(attended.attend).indexOf(user.value._id) > -1) userDatas.value.attend_status = true
+    userDatas.value.time = timeCheck(attended.date)
+  }, 950);
   setTimeout(() => {
     animate.init(rdComponent.value);
   }, 50 * props.index);
-  // console.log(await getAttendanceDetails(props.data._id))
-  // console.log("attendances")
-  // console.log(userDatas.value.attendances)
+  console.log(userDatas.value.time)
+  // console.log(user.value._id)
 });
 </script>
 
@@ -455,26 +499,48 @@ onMounted(async () => {
   flex-wrap: wrap;
 
   .rd-class-attendance-detail-container {
-    margin-top: 0.5rem;
-    flex-direction: row;
     position: relative;
-    display: flex;
     width: 100%;
-    flex-direction: row;
+    display: flex;
+    box-sizing: border-box;
+    height: 2rem;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+
+    .rd-class-attendance-date {
+      position: relative;
+      display: flex;
+      // height: 1rem;
+      width: 100%;
+      flex-direction: row;
+      justify-content: space-between;
+    }
 
     .rd-class-attendance-bar-container {
       position: relative;
       display: flex;
-      height: 1rem;
+      // height: 1rem;
       width: 100%;
       flex-direction: row;
+      justify-content: space-between;
 
       .rd-class-attendance-bar {
+        border: 1px solid var(--background-depth-five-color);
         width: calc(100% / 16);
-        height: 1rem;
+        height: 0.5rem;
         position: relative;
         display: flex;
-        background-color: var(--error-color);
+        background-color: gray;
+
+        &.opened {
+          background-color: var(--success-color);
+        }
+
+        &.absent {
+          background-color: var(--error-color);
+
+        }
       }
     }
   }

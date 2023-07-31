@@ -11,15 +11,17 @@
           </div>
         </div>
         <div class="rd-subpage-body" :style="viewMode === 'mobile' ? 'width: 100%; padding: 0.5rem;' : ''">
-          <div v-if="(user.role === 'student' && !user.class_id) || user.role === 'admin'" ref="rdClassWrapper"
-            class="rd-class-wrapper" :style="viewMode === 'mobile' ? 'width: 100%; padding: 0.5rem;' : ''">
+          <!-- <div v-if="(user.role === 'student' && !user.class_id) || user.role === 'admin'" ref="rdClassWrapper" -->
+          <div ref="rdClassWrapper" class="rd-class-wrapper"
+            :style="viewMode === 'mobile' ? 'width: 100%; padding: 0.5rem;' : ''">
             <rd-active-class v-for="(classRoom, i) in classes" :key="i" class="rd-class" :index="i" :data="classRoom"
               @open-panel="emits('open-panel', { state: 'show', type: 'add-class-form', data: classRoom })"
+              @delete-panel="emits('open-panel', { state: 'show', type: 'delete-class-form', data: classRoom })"
               :style="viewMode === 'mobile' ? 'width: 80%; padding: 0.15rem;' : ''" />
           </div>
           <!-- <div v-else ref="rdClassWrapper" class="rd-class-wrapper"
             :style="viewMode === 'mobile' ? 'width: 100%; padding: 0.5rem;' : ''">
-            <rd-active-class v-for="(classRoom, i) in classes" :key="i" class="rd-class" :index="i" :data="classRoom"
+            <rd-active-class class="rd-class" :index="15" :data="userDatas.class"
               @open-panel="emits('open-panel', { state: 'show', type: 'add-class-form', data: classRoom })"
               :style="viewMode === 'mobile' ? 'width: 80%; padding: 0.15rem;' : ''" />
           </div> -->
@@ -45,7 +47,15 @@ const emits = defineEmits(["logout", "open-panel", "navigate"]);
 const { viewMode } = useMain();
 const router = useRouter();
 const rdContainer = ref<HTMLDivElement>(null);
+const userDatas = ref<USERSTYPE>({
+  class: [],
+  // classes: [],
 
+});
+interface USERSTYPE {
+  class: any;
+  // classes: any;
+}
 const animate = {
   init(
     rdPageHeader: HTMLElement,
@@ -116,9 +126,20 @@ const animate = {
 };
 
 
+
 onMounted(async () => {
-  await getClasses();
-  console.log(classes.value._id)
+  await getClasses;
+  // await console.log(classes.value)
+  setTimeout(() => {
+
+    if (user.value.role !== "admin") {
+      userDatas.value.class = classes.value.find((users_class) => {
+        return users_class._id === user.value.class_id;
+      });
+    }
+    console.log(userDatas.value.class)
+  }, 250);
+
 });
 </script>
 

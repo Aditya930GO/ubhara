@@ -49,7 +49,7 @@ import gsap from "gsap";
 const dropDownState = ref<boolean>(false);
 const dropDownOpened = ref<boolean>(false);
 
-const { attendances, getAttendances } = useAttendance();
+const { getAttendances } = useAttendance();
 const { students, user, users, enrollClass, getUsers } = useUser();
 const router = useRouter();
 
