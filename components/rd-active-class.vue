@@ -8,10 +8,14 @@
         </div>
         <div class="rd-class-header-buttons-container">
           <div v-if="user.role === 'admin'" class="rd-class-header-button-container">
-            <button class="rd-class-action" @focusout="dropDownCloser()" @mousedown="openAttendance()
+            <button v-if="userDatas.attended >= userDatas.attendances" class="rd-class-action"
+              @focusout="dropDownCloser()" @mousedown="openAttendance()
+                " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
+              <rd-svg name="plus" color="secondary" />
+            </button>
+            <button v-else class="rd-class-action" @focusout="dropDownCloser()" @mousedown="openAttendance()
               " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
-              <rd-svg v-if="userDatas.attended >= userDatas.attendances" name="plus" color="secondary" />
-              <rd-svg v-else name="check" color="secondary" />
+              <rd-svg name="check" color="secondary" />
             </button>
           </div>
           <div v-if="(user.role === 'student' && !user.class_id) || user.role === 'admin'"
@@ -30,6 +34,7 @@
           </div>
         </div>
         <div v-if="dropDownState" class="actions-container" @focusout="dropDownCloser()">
+
           <div v-if="user.role === 'student' && !user.class_id" ripple class="action"
             @mousedown="dropDownState = false, submitEnrollClass()">
             <div class="rd-icon-container">
@@ -115,6 +120,11 @@
         <rd-input-button v-if="user.role === 'student'" style="width: 100%;" class="rd-subpage-body-button"
           :label="userDatas.attend_status ? 'Sudah Absen' : userDatas.time ? 'Absen' : 'Absensi di tutup'" type="primary"
           :disabled="userDatas.attend_status || !userDatas.time" @clicked="submitAttend()" />
+      </div>
+      <div v-if="user.role === 'student' && !user.class_id" class="rd-class-attendance-button-container"
+        style="justify-content: center; ">
+        <rd-input-button v-if="user.role === 'student'" style="width: 100%;" class="rd-subpage-body-button"
+          :label="'Daftar'" type="primary" @clicked="submitEnrollClass()" />
       </div>
     </div>
   </div>
@@ -210,7 +220,7 @@ function pindah(): void {
 async function openAttendance() {
   console.log(props.data._id)
   openClassAttendance(props.data._id.toLocaleString())
-  location.reload();
+  // location.reload();
   userDatas.value.attendance = await getAttendanceDetails(props.data._id)
 }
 function formatDate(str: string): string {
@@ -246,7 +256,7 @@ async function exportAsExcel() {
 
 onMounted(async () => {
   userDatas.value.attendance = await getAttendanceDetails(props.data._id)
-  console.log(props.data)
+  // console.log(props.data)
   setTimeout(() => {
     // console.log(userDatas.value.attendance)
     userDatas.value.tags = props.data.tags?.split(',')
@@ -267,7 +277,7 @@ onMounted(async () => {
   setTimeout(() => {
     animate.init(rdComponent.value);
   }, 50 * props.index);
-  console.log(userDatas.value.time)
+  // console.log(userDatas.value.time)
   // console.log(user.value._id)
 });
 </script>

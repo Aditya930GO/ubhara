@@ -19,12 +19,6 @@
               @delete-panel="emits('open-panel', { state: 'show', type: 'delete-class-form', data: classRoom })"
               :style="viewMode === 'mobile' ? 'width: 80%; padding: 0.15rem;' : ''" />
           </div>
-          <!-- <div v-else ref="rdClassWrapper" class="rd-class-wrapper"
-            :style="viewMode === 'mobile' ? 'width: 100%; padding: 0.5rem;' : ''">
-            <rd-active-class class="rd-class" :index="15" :data="userDatas.class"
-              @open-panel="emits('open-panel', { state: 'show', type: 'add-class-form', data: classRoom })"
-              :style="viewMode === 'mobile' ? 'width: 80%; padding: 0.15rem;' : ''" />
-          </div> -->
         </div>
       </div>
 
@@ -49,8 +43,6 @@ const router = useRouter();
 const rdContainer = ref<HTMLDivElement>(null);
 const userDatas = ref<USERSTYPE>({
   class: [],
-  // classes: [],
-
 });
 interface USERSTYPE {
   class: any;
@@ -536,7 +528,7 @@ onMounted(async () => {
           flex-wrap: wrap;
 
           .rd-class {
-            width: calc((100% - 2rem) / 3);
+            width: calc((100% - 2.5rem) / 3);
           }
         }
 

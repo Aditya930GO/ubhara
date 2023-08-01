@@ -107,6 +107,8 @@
         @exit="panelHandler({ state: 'hide' })" />
       <rd-user-form-panel v-if="panelOpened === 'user-form'" :state="panelState" :data="panelData[0]"
         @exit="panelHandler({ state: 'hide' })" />
+      <rd-delete-user-form-panel v-if="panelOpened === 'delete-user-form'" :state="panelState" :data="panelData[0]"
+        @exit="panelHandler({ state: 'hide' })" />
       <rd-analytics v-if="user && route.path !== '/login' && panelOpened !== 'analytics' && viewMode === 'desktop'"
         :state="panelState" :data="panelData[0]" @exit="panelHandler({ state: 'hide' })" />
       <rd-class-configure-panel v-if="panelOpened === 'class-configure'" :state="panelState" :data="panelData[0]"
@@ -144,6 +146,7 @@ type PanelType =
   | "class-configure"
   | "login-form"
   | "user-form"
+  | "delete-user-form"
   | "employee-role-form"
   | "add-class-form"
   | "delete-class-form";
@@ -506,23 +509,6 @@ function selectOption(action: EmitsName): void {
   dropDownHandler("close");
   emits(action);
 }
-// async function exportAsExcel() {
-//   exportClasses()
-// }
-// async function exportAsExcel() {
-//   this.loadingExport = true;
-//   const fileSaver = require("file-saver");
-//   const { data } = await this.$axios({
-//     url: `${this.$config.apiURL}/attendances/excel/`,
-//     method: "GET",
-//     responseType: "blob",
-//   });
-//   let filename = "absensi" ;
-
-//   fileSaver(data, `${filename}.xlsx`);
-//   this.loadingExport = false;
-//   this.simple = false;
-// }
 
 
 function dropDownHandler(state: "open" | "close"): void {

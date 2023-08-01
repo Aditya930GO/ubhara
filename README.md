@@ -1,2 +1,0 @@
-# arsip-data-tahanan-bnn
- 

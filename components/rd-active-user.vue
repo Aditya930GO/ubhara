@@ -1,8 +1,9 @@
 <template>
   <div class="rd-component" ref="rdComponent">
     <div class="rd-class-body">
+
       <div class="rd-class-number-container">
-        <span class="rd-class-number rd-headline-3">{{ props.index + 1 }}</span>
+        <span class="rd-class-number rd-headline-3">{{ props.index }}</span>
       </div>
       <div class="rd-class-name-container">
         <span class="rd-class-name rd-headline-3">{{ props.data.name }}</span>
@@ -10,21 +11,28 @@
       <div class="rd-class-name-container">
         <span class="rd-class-name rd-headline-3">{{ props.data.nim }}</span>
       </div>
-      <div class="rd-class-name-container">
+      <!-- <div class="rd-class-name-container">
         <span class="rd-class-name rd-headline-3">{{ props.data.nim }}</span>
-      </div>
+      </div> -->
       <div class="rd-class-name-container">
         <span class="rd-class-name rd-headline-3">{{ props.data.role }}</span>
       </div>
-      <div class="rd-class-header-button-container">
+      <div v-if="props.index !== 'No.'" class="rd-class-header-button-container">
         <button class="rd-class-action" @click="emits('open-panel')
-        " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
+          " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
           <rd-svg name="pencil" color="secondary" />
         </button>
       </div>
-      <div class="rd-class-header-button-container">
-        <button class="rd-class-action" @click="
-              " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
+      <div v-if="props.index !== 'No.'" class="rd-class-header-button-container">
+        <button class="rd-class-action" @click="emits('open-panel-delete-student')
+          " :style="dropDownOpened ? 'background: var(--primary-color)' : ''">
+          <rd-svg :name="'close'" color="secondary" />
+        </button>
+      </div>
+      <div v-if="props.index !== 'No.'" class="rd-class-header-button-container">
+        <button class="rd-class-action" @mousedown=" dropDownState ? (dropDownState = false) : (dropDownState = true)"
+          :style="dropDownOpened
+            ? 'background: var(--primary-color)' : ''">
           <rd-svg name="dots-horizontal" color="secondary" />
         </button>
       </div>
@@ -42,10 +50,10 @@ const dropDownOpened = ref<boolean>(false);
 const { user, users, enrollClass, getUsers } = useUser();
 const router = useRouter();
 
-const emits = defineEmits(["logout", "open-panel"]);
+const emits = defineEmits(["logout", "open-panel", "open-panel-delete-student", "delete-panel"]);
 const config = useRuntimeConfig();
 const props = defineProps<{
-  index: number;
+  index: any;
   data;
 }>();
 
@@ -91,10 +99,7 @@ function dropDownCloser(): void {
     dropDownState.value = false;
   }, 150);
 }
-function test(): void {
-  console.log("hai")
-  emits('open-panel', { state: 'show', type: 'add-class-form' })
-}
+
 onMounted(() => {
   setTimeout(async () => {
     await getUsers()
@@ -104,9 +109,6 @@ onMounted(() => {
     }
   }, 250);
   // userDatas.value.tags = props.data.tags.split(',')
-  console.log("props.data._id")
-  console.log(props.data._id)
-  console.log(props.index)
   setTimeout(() => {
     animate.init(rdComponent.value);
   }, 50 * props.index);
@@ -126,129 +128,123 @@ onMounted(() => {
   flex-direction: row;
   // transform: scale(0.875);
 
-  .rd-class-header {
-    position: relative;
-    width: 100%;
-    height: 3rem;
-    justify-content: space-between;
-    box-sizing: border-box;
-    display: flex;
 
-    .rd-class-header-button-container {
-      border: 1px solid var(--primary-color);
+  .rd-class-header-button-container {
+    border: 1px solid var(--primary-color);
+    position: relative;
+    height: 1.75rem;
+    width: 1.75rem;
+    border-radius: 25%;
+    overflow: hidden;
+    background: var(--background-depth-two-color);
+    display: flex;
+    flex-shrink: 0;
+    margin: 1rem;
+
+    >* {
+      cursor: pointer;
       position: relative;
-      height: 1.75rem;
       width: 1.75rem;
-      border-radius: 25%;
-      overflow: hidden;
-      background: var(--background-depth-two-color);
+      height: 1.75rem;
+      background: white;
+      border: none;
       display: flex;
       flex-shrink: 0;
-      margin: 1rem;
-
-      >* {
-        cursor: pointer;
-        position: relative;
-        width: 1.75rem;
-        height: 1.75rem;
-        background: white;
-        border: none;
-        display: flex;
-        flex-shrink: 0;
-        justify-content: center;
-        align-items: center;
-      }
-
-      .rd-class-action {
-        padding: 0 0.2rem;
-        box-sizing: border-box;
-        transition: background-color 0.25s;
-
-        &:hover {
-          background: rgba(0, 0, 0, 0.05);
-        }
-      }
+      justify-content: center;
+      align-items: center;
     }
 
-    .actions-container {
-      z-index: 1000000;
-      position: absolute;
-      top: 100%;
-      right: 1rem;
-      border-radius: 0.75rem;
-      background: var(--background-depth-two-color);
-      border: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: flex-start;
+    .rd-class-action {
+      padding: 0 0.2rem;
+      box-sizing: border-box;
+      transition: background-color 0.25s;
 
-      .action {
-        cursor: pointer;
-        position: relative;
-        width: 10rem;
-        height: 2rem;
-        flex-shrink: 0;
-        background: rgba(255, 255, 255, 0);
-        transition: 0.25s background-color;
-        padding: 0 0.5rem;
-        box-sizing: border-box;
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-
-        .rd-icon-container {
-          font-size: 1rem;
-          width: 1.25rem;
-        }
-
-        .name {
-          // font-family: "Quicksand";
-          font-size: 0.65rem;
-          font-weight: 600;
-          margin-left: 0.5rem;
-        }
-
-        &.error {
-          color: var(--error-color);
-
-          .icon {
-            color: inherit;
-          }
-
-          h3.name {
-            color: inherit;
-          }
-        }
-
-        &:hover {
-          background: rgba(230, 230, 230, 0.5);
-        }
-
-        &:first-child {
-          border-top-left-radius: 18px;
-          border-top-right-radius: 18px;
-        }
-
-        &:last-child {
-          border-bottom-left-radius: 18px;
-          border-bottom-right-radius: 18px;
-        }
-      }
-
-      .divider {
-        position: relative;
-        width: calc(100% - 1rem);
-        height: 1px;
-        flex-shrink: 0;
-        margin: 0 0.5rem;
+      &:hover {
         background: rgba(0, 0, 0, 0.05);
       }
     }
   }
 
+  .actions-container {
+    z-index: 90909090;
+    position: absolute;
+    top: 100%;
+    right: 1rem;
+    border-radius: 0.75rem;
+    background: var(--background-depth-two-color);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    .action {
+      cursor: pointer;
+      position: relative;
+      width: 10rem;
+      height: 2rem;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0);
+      transition: 0.25s background-color;
+      padding: 0 0.5rem;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+
+      .rd-icon-container {
+        font-size: 1rem;
+        width: 1.25rem;
+      }
+
+      .name {
+        // font-family: "Quicksand";
+        font-size: 0.65rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+      }
+
+      &.error {
+        color: var(--error-color);
+
+        .icon {
+          color: inherit;
+        }
+
+        h3.name {
+          color: inherit;
+        }
+      }
+
+      &:hover {
+        background: rgba(230, 230, 230, 0.5);
+      }
+
+      &:first-child {
+        border-top-left-radius: 18px;
+        border-top-right-radius: 18px;
+      }
+
+      &:last-child {
+        border-bottom-left-radius: 18px;
+        border-bottom-right-radius: 18px;
+      }
+    }
+
+    .divider {
+      position: relative;
+      width: calc(100% - 1rem);
+      height: 1px;
+      flex-shrink: 0;
+      margin: 0 0.5rem;
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
+
+
 
   .rd-class-body {
+    z-index: 1;
     position: relative;
     width: 100%;
     height: 1rem;
@@ -318,6 +314,83 @@ onMounted(() => {
         &:hover {
           background: rgba(0, 0, 0, 0.05);
         }
+      }
+    }
+
+    .actions-container {
+      z-index: 99999;
+      position: absolute;
+      top: 100%;
+      right: 1rem;
+      border-radius: 0.75rem;
+      background: var(--background-depth-two-color);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+
+      .action {
+        cursor: pointer;
+        z-index: 99999;
+        position: relative;
+        width: 10rem;
+        height: 2rem;
+        flex-shrink: 0;
+        background: rgba(255, 255, 255, 0);
+        transition: 0.25s background-color;
+        padding: 0 0.5rem;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+
+        .rd-icon-container {
+          font-size: 1rem;
+          width: 1.25rem;
+        }
+
+        .name {
+          // font-family: "Quicksand";
+          font-size: 0.65rem;
+          font-weight: 600;
+          margin-left: 0.5rem;
+        }
+
+        &.error {
+          color: var(--error-color);
+
+          .icon {
+            color: inherit;
+          }
+
+          h3.name {
+            color: inherit;
+          }
+        }
+
+        &:hover {
+          background: rgba(230, 230, 230, 0.5);
+        }
+
+        &:first-child {
+          border-top-left-radius: 18px;
+          border-top-right-radius: 18px;
+        }
+
+        &:last-child {
+          border-bottom-left-radius: 18px;
+          border-bottom-right-radius: 18px;
+        }
+      }
+
+      .divider {
+        position: relative;
+        width: calc(100% - 1rem);
+        height: 1px;
+        flex-shrink: 0;
+        margin: 0 0.5rem;
+        background: rgba(0, 0, 0, 0.05);
       }
     }
 

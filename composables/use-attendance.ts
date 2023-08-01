@@ -16,14 +16,13 @@ export default () => {
     };
   });
 
-  const addAttendance = async (payload): Promise<string> => {
+  const addAttendances = async (payload): Promise<string> => {
     try {
       const response: Response = await $fetch(
         `${config.public.apiBase}/attendances`,
         "post",
         JSON.stringify({
           class_id: payload.class_id,
-          // date: payload.date,
           add_attendance: payload.add_attendance,
         })
       );
@@ -122,7 +121,7 @@ export default () => {
     query,
     submitAttendance,
     openClassAttendance,
-    addAttendance,
+    addAttendances,
     updateClass,
     getAttendances,
     getAttendanceDetails,

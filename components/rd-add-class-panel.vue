@@ -37,7 +37,7 @@ import { processSlotOutlet } from "@vue/compiler-core";
 
 // const { getInmates, addInmate, updateInmate, getInmateDetails } = useInmate();
 const { getClasses, addClass, updateClass, getClassDetails } = useClass();
-const { addAttendance } = useAttendance();
+const { addAttendances } = useAttendance();
 
 const props = defineProps<{
   state: "idle" | "hide";
@@ -53,8 +53,6 @@ var birthdateInmate = null;
 var dataImageUrl = null;
 const panelState = ref<"idle" | "hide">("idle");
 
-const category: string[] = ["Kategori I", "Kategori II", "Kategori III"];
-const sexs: string[] = ["pria", "wanita"];
 const months: string[] = [
   "Januari",
   "Februari",
@@ -70,11 +68,6 @@ const months: string[] = [
   "Desember",
 ];
 
-const fileInput = ref<InputImageOption>({
-  label: "Upload images",
-  limit: 3,
-  file: [],
-});
 
 
 const nameInput = ref<InputOption>({
@@ -329,7 +322,7 @@ async function submit(): Promise<void> {
       class_id: addId,
       add_attendance: false
     }
-    await addAttendance(payload)
+    await addAttendances(payload)
     console.log(addId);
     panelState.value = "hide";
   } else {

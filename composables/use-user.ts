@@ -11,8 +11,11 @@ export default () => {
     maxAge: 86400,
   });
   let usersData = [];
+
   const user = useState<User>("user", () => null);
   const users = useState<User[]>("users", () => null);
+  const admins = useState<User[]>("admins", () => null);
+
   const students = useState<User[]>("students", () => null);
 
   const login = async (email: string, password: string): Promise<User> => {
@@ -82,9 +85,17 @@ export default () => {
       if (response.status !== 200) throw new Error("");
 
       const result: User[] = await response.json();
-      users.value = result;
-      // console.log(result);
-      usersData = result;
+      const temp: User[] = [];
+      const admin: User[] = [];
+      for (const tempUser of result) {
+        if (tempUser.role === "admin") {
+          admin.push(tempUser);
+        } else if (tempUser.role === "student") {
+          temp.push(tempUser);
+        }
+      }
+      users.value = temp;
+      admins.value = admin;
       return result;
     } catch (e) {
       return null;
@@ -116,14 +127,12 @@ export default () => {
         `${config.public.apiBase}/users/${payload._id}`,
         "put",
         JSON.stringify({
-          // role_id: payload.role_id,
-          // branch_id: payload.branch_id,
           name: payload.name,
           email: payload.email,
           password: payload.password,
           old_password: payload.old_password,
+          phone: payload.phone,
           // birth_date: payload.birth_date,
-          // phone: payload.phone,
         })
       );
 
@@ -143,6 +152,28 @@ export default () => {
           })
         );
       }
+      return "SUCCESS";
+    } catch (e) {
+      console.log("e");
+      console.log(e);
+      return "INVALID";
+    }
+  };
+  const deleteUser = async (payload): Promise<string> => {
+    try {
+      const response: Response = await $fetch(
+        `${config.public.apiBase}/users/delete/${payload._id}`,
+        "put",
+        JSON.stringify({
+          email: payload.email,
+          password: payload.password,
+        })
+      );
+
+      console.log("response");
+      console.log(response);
+      console.log("response.text()");
+      console.log(response.text() + "sad");
       return "SUCCESS";
     } catch (e) {
       console.log("e");
@@ -191,9 +222,11 @@ export default () => {
     students,
     user,
     users,
+    admins,
     usersData,
     getStudent,
     updateUser,
+    deleteUser,
     login,
     logout,
     refresh,

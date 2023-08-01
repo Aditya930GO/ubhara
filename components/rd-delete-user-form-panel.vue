@@ -1,34 +1,23 @@
 <template>
-  <rd-panel class="rd-panel" :label="'Ubah User'" :state="panelState" :loading="dataLoading" @exit="emits('exit')">
+  <rd-panel class="rd-panel" :label="'Hapus User'" :state="panelState" :loading="dataLoading" @exit="emits('exit')">
     <div class="rd-input-wrapper">
-      <rd-input-text class="rd-input" :input="unameInput" />
+      <rd-input-text class="rd-input" :input="nameInput" :disabled="true" />
     </div>
     <div class="rd-input-wrapper">
-      <rd-input-text class="rd-input" :input="nameInput" />
+      <rd-input-text class="rd-input" :input="emailInput" :disabled="true" />
     </div>
     <div class="rd-input-wrapper">
-      <rd-input-text class="rd-input" :input="emailInput" />
+      <rd-input-text class="rd-input" :input="nimInput" :disabled="true" />
     </div>
-    <!-- <div class="rd-input-wrapper">
-      <rd-input-text class="rd-input" :input="phoneInput" />
-    </div> -->
     <div class="rd-input-wrapper">
-      <rd-input-text class="rd-input" :input="oldPasswordInput" />
+      <rd-input-text class="rd-input" :input="emailAdminInput" />
     </div>
     <div class="rd-input-wrapper">
       <rd-input-text class="rd-input" :input="passwordInput" />
     </div>
-    <div class="rd-input-wrapper" style="margin-bottom: 3rem">
-      <rd-input-text class="rd-input" :input="passwordCheckInput" />
-    </div>
     <div class="rd-input-button-wrapper">
       <rd-input-button class="rd-input-button" :label="props.data ? 'Update' : 'Submit'" :loading="submitLoading"
-        :disabled="!name ||
-          !email ||
-          !password ||
-          check_password !== password ||
-          old_password === password
-          " @clicked="submit" />
+        :disabled="!email || !password" @clicked="submit" />
     </div>
   </rd-panel>
 </template>
@@ -43,8 +32,8 @@ import {
 import { User } from "~~/interfaces/user";
 
 const config = useRuntimeConfig();
-const { refresh, updateUser } = useUser();
-const emits = defineEmits(["exit", "open-panel"]);
+const { refresh, deleteUser } = useUser();
+const emits = defineEmits(["exit", "open-panel", "delete-success"]);
 const props = defineProps<{
   state: "idle" | "hide";
   data?;
@@ -57,12 +46,6 @@ const submitLoading = ref<boolean>(false);
 const selectedRoles = ref<string[]>([]);
 const selectedBranches = ref<string[]>([]);
 
-const fileInput = ref<InputFileOption>({
-  disabled: false,
-  file: null,
-  type: "image",
-  label: "Picture",
-});
 const statusInput = ref<InputGeneric<"active" | "inactive">>({
   name: "status",
   placeholder: "active",
@@ -103,19 +86,18 @@ const emailInput = ref<InputOption>({
   label: "Email",
   error: "",
 });
-const phoneInput = ref<InputOption>({
-  name: "phone",
-  placeholder: "+62812345678",
+const emailAdminInput = ref<InputOption>({
+  name: "email",
+  placeholder: "john@doe.com",
   model: "",
-  label: "Phone",
+  label: "Email",
   error: "",
 });
-const birthDateInput = ref<InputOption>({
-  name: "birth-date",
-  placeholder: "29-09-2022",
+const nimInput = ref<InputOption>({
+  name: "Nim",
+  placeholder: "000",
   model: "",
-  value: "",
-  label: "Birth date",
+  label: "NIM",
   error: "",
 });
 const passwordInput = ref<InputOption>({
@@ -126,22 +108,7 @@ const passwordInput = ref<InputOption>({
   label: "Password baru",
   error: "",
 });
-const oldPasswordInput = ref<InputOption>({
-  name: "password",
-  placeholder: "Shusssh",
-  model: "",
-  type: "password",
-  label: "Password lama",
-  error: "",
-});
-const passwordCheckInput = ref<InputOption>({
-  name: "password",
-  placeholder: "Shusssh",
-  model: "",
-  type: "password",
-  label: "Ulangi Password Baru",
-  error: "",
-});
+
 
 // const file: ComputedRef<File> = computed(() => fileInput.value.file);
 const status: ComputedRef<"active" | "inactive"> = computed(
@@ -149,36 +116,20 @@ const status: ComputedRef<"active" | "inactive"> = computed(
 );
 const name: ComputedRef<string> = computed(() => nameInput.value.model);
 const email: ComputedRef<string> = computed(() => emailInput.value.model);
-const phone: ComputedRef<string> = computed(() => phoneInput.value.model);
-const birthDate: ComputedRef<number> = computed(() =>
-  new Date(birthDateInput.value.value).setHours(0, 0, 0, 0)
-);
 const password: ComputedRef<string> = computed(() => passwordInput.value.model);
-const old_password: ComputedRef<string> = computed(
-  () => oldPasswordInput.value.model
-);
-const check_password: ComputedRef<string> = computed(
-  () => passwordCheckInput.value.model
-);
 
 async function submit(): Promise<void> {
   submitLoading.value = true;
   console.log(props.data._id)
-  const userId: string = await updateUser({
+  const userId: string = await deleteUser({
     _id: props.data._id,
-    name: name.value,
     email: email.value,
-    phone: phone.value,
     password: password.value,
-    old_password: old_password.value,
-    // role_id: selectedRoles.value,
-    // birth_date: birthDate.value,
-    // branch_id: selectedBranches.value,
   });
   console.log("userId");
   console.log(userId);
   if (userId === "SUCCESS") {
-    await refresh();
+    location.reload();
     panelState.value = "hide";
   } else if (userId !== "SUCCESS") {
     submitLoading.value = false;
@@ -194,17 +145,10 @@ watch(
 
 onMounted(async () => {
   if (props.data) {
-    console.log(props.data);
-    fileInput.value.image_url = props.data.image_url
-      ? `${config.public.apiBase}/files${props.data.image_url}`
-      : "";
     unameInput.value.model = props.data.username;
     nameInput.value.model = props.data.name;
+    nimInput.value.model = props.data.nim;
     emailInput.value.model = props.data.email;
-    phoneInput.value.model = props.data.phone;
-    birthDateInput.value.value = new Date(props.data.birth_date).toISOString();
-    console.log(props.data._id)
-    console.log(props.data._id)
   } else {
     console.log("props.data._id")
   }
